@@ -281,6 +281,7 @@ void Win32Window::UpdateTheme(HWND const window) {
                                 &light_mode_size);
 
   if (result == ERROR_SUCCESS) {
+    // The registry value is named "AppsUseLightTheme", so 0 means light theme is OFF (dark mode ON)
     BOOL dark_mode = light_mode == 0;
     DwmSetWindowAttribute(window, DWMWA_USE_IMMERSIVE_DARK_MODE, &dark_mode,
                           sizeof(dark_mode));

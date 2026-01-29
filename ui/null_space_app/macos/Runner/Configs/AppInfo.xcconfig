@@ -11,4 +11,4 @@ PRODUCT_NAME = null_space_app
 PRODUCT_BUNDLE_IDENTIFIER = com.nullspace.nullSpaceApp
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2024 Null Space. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2024-2026 Null Space. All rights reserved.

@@ -91,7 +91,7 @@ Platform-specific code has been implemented for all four major platforms support
 - `runner/runner.exe.manifest` - Application manifest for DPI awareness
 
 #### Key Features:
-- Windows 7+ support
+- Windows 8+ support (minimum Windows 8)
 - High DPI support (PerMonitorV2)
 - Dark/Light theme detection
 - Win32 window chrome

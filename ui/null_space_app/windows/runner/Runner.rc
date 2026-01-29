@@ -93,7 +93,7 @@ BEGIN
             VALUE "FileDescription", "Null Space - Secure Note Taking" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "null_space_app" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 Null Space. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024-2026 Null Space. All rights reserved." "\0"
             VALUE "OriginalFilename", "null_space_app.exe" "\0"
             VALUE "ProductName", "Null Space" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

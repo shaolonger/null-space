@@ -25,6 +25,8 @@ This directory contains the platform-specific code for running the Null Space ap
 - **Location**: `windows/`
 - **Entry Point**: `main.cpp`, `flutter_window.cpp`
 
+Note: PerMonitorV2 DPI awareness requires Windows 10 version 1607 or later, but the app will still run on Windows 8/8.1 with PerMonitor DPI awareness.
+
 ## Building for Each Platform
 
 ### Android
