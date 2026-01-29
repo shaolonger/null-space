@@ -1,0 +1,5 @@
+*.mode1v3 merge=binary
+*.mode2v3 merge=binary
+*.pbxuser merge=binary
+*.perspectivev3 merge=binary
+*.xcscmblueprint merge=binary
