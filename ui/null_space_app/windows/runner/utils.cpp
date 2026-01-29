@@ -59,5 +59,7 @@ std::string Utf8FromUtf16(const wchar_t* utf16_string) {
   if (converted_length == 0) {
     return std::string();
   }
+  // Remove the null terminator that was included in the conversion
+  utf8_string.resize(converted_length - 1);
   return utf8_string;
 }

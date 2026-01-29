@@ -21,7 +21,7 @@ This directory contains the platform-specific code for running the Null Space ap
 - **Entry Point**: `AppDelegate.swift`, `MainFlutterWindow.swift`
 
 ### Windows
-- **Minimum Version**: Windows 7
+- **Minimum Version**: Windows 8
 - **Location**: `windows/`
 - **Entry Point**: `main.cpp`, `flutter_window.cpp`
 
