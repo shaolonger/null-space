@@ -1,0 +1,14 @@
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+**/xcshareddata/
+**/xcuserdata/
+DerivedData/
+.generated/
+*.hmap
+*.ipa
+
+# CocoaPods
+Pods/
+.symlinks/
