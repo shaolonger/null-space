@@ -1,0 +1,40 @@
+[package]
+name = "null-space-core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Core library for Null Space - secure, local-first note-taking"
+
+[lib]
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[dependencies]
+# Workspace dependencies
+aes-gcm.workspace = true
+argon2.workspace = true
+rand.workspace = true
+zeroize.workspace = true
+tantivy.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+zip.workspace = true
+walkdir.workspace = true
+tokio.workspace = true
+anyhow.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+
+# Additional dependencies
+chrono = { version = "0.4", features = ["serde"] }
+base64 = "0.21"
+
+[dev-dependencies]
+tracing-subscriber.workspace = true
+tempfile = "3.8"
+
+[features]
+default = []
+flutter-bridge = []
