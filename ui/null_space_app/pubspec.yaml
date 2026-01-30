@@ -19,7 +19,7 @@ dependencies:
   
   # File handling
   path_provider: ^2.1.1
-  file_picker: ^6.1.1
+  file_picker: ^8.0.0
   
   # Storage
   sqflite: ^2.3.0
