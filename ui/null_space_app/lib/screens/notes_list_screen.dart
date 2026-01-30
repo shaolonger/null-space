@@ -198,15 +198,15 @@ class _NotesListScreenState extends State<NotesListScreen> {
         break;
       case SortOption.titleAsc:
         sortedNotes.sort((a, b) {
-          final titleA = a.title.isEmpty ? 'Untitled' : a.title;
-          final titleB = b.title.isEmpty ? 'Untitled' : b.title;
+          final titleA = a.title.isEmpty ? 'Untitled Note' : a.title;
+          final titleB = b.title.isEmpty ? 'Untitled Note' : b.title;
           return titleA.toLowerCase().compareTo(titleB.toLowerCase());
         });
         break;
       case SortOption.titleDesc:
         sortedNotes.sort((a, b) {
-          final titleA = a.title.isEmpty ? 'Untitled' : a.title;
-          final titleB = b.title.isEmpty ? 'Untitled' : b.title;
+          final titleA = a.title.isEmpty ? 'Untitled Note' : a.title;
+          final titleB = b.title.isEmpty ? 'Untitled Note' : b.title;
           return titleB.toLowerCase().compareTo(titleA.toLowerCase());
         });
         break;
@@ -216,8 +216,9 @@ class _NotesListScreenState extends State<NotesListScreen> {
   }
 
   Future<void> _onRefresh() async {
-    // Simulate a refresh operation
-    // In a real app, this would reload notes from storage
+    // Placeholder for refresh functionality
+    // In a production app, this would reload notes from encrypted storage
+    // For now, just provide visual feedback to the user
     await Future.delayed(const Duration(milliseconds: 500));
   }
 
@@ -226,6 +227,8 @@ class _NotesListScreenState extends State<NotesListScreen> {
     noteProvider.selectNote(note);
 
     // TODO: Replace with actual vault credentials from VaultProvider
+    // These are placeholder values for development only and should not be used in production
+    // The app should prevent navigation to the editor if vault credentials are not available
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const NoteEditorScreen(
@@ -246,10 +249,12 @@ class _NotesListScreenState extends State<NotesListScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Note "${note.title.isEmpty ? 'Untitled' : note.title}" deleted'),
+            content: Text('Note "${note.title.isEmpty ? 'Untitled Note' : note.title}" deleted'),
             action: SnackBarAction(
               label: 'Undo',
               onPressed: () {
+                // Note: Undo adds the note back to the list, which may not preserve
+                // the original position. Since the list is sorted, this is acceptable behavior.
                 noteProvider.addNote(note);
               },
             ),
