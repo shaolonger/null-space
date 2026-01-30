@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import 'screens/home_screen.dart';
 import 'providers/vault_provider.dart';
 import 'providers/note_provider.dart';
+import 'providers/search_provider.dart';
+import 'services/search_service.dart';
+import 'bridge/rust_bridge.dart';
 import 'models/note.dart';
 
 void main() {
@@ -14,6 +17,10 @@ class NullSpaceApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Initialize Rust bridge
+    final rustBridge = RustBridge();
+    rustBridge.init();
+    
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => VaultProvider()),
@@ -24,6 +31,11 @@ class NullSpaceApp extends StatelessWidget {
             _addSampleNotes(provider);
             return provider;
           },
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SearchProvider(
+            searchService: SearchService(bridge: rustBridge),
+          ),
         ),
       ],
       child: MaterialApp(

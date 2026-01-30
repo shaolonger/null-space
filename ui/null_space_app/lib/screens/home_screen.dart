@@ -76,34 +76,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
-/// Search screen placeholder
-class SearchScreen extends StatelessWidget {
-  const SearchScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          TextField(
-            decoration: InputDecoration(
-              hintText: 'Search notes...',
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Expanded(
-            child: Center(
-              child: Text('Enter search query to find notes'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
