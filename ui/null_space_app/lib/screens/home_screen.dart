@@ -122,8 +122,21 @@ class VaultScreen extends StatelessWidget {
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 8),
-          const Text('Import/Export encrypted vaults'),
+          const Text('Create and manage encrypted vaults'),
           const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () {
+              // TODO: Implement vault creation with proper services
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Vault creation dialog will be shown here'),
+                ),
+              );
+            },
+            icon: const Icon(Icons.add),
+            label: const Text('Create New Vault'),
+          ),
+          const SizedBox(height: 8),
           ElevatedButton.icon(
             onPressed: () {},
             icon: const Icon(Icons.upload),
