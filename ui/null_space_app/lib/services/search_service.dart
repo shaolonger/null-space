@@ -55,6 +55,14 @@ class SearchResult {
 
   /// Create a SearchResult from JSON data returned by Rust bridge
   factory SearchResult.fromJson(Map<String, dynamic> json) {
+    // Validate required fields
+    if (!json.containsKey('note_id') || json['note_id'] == null) {
+      throw FormatException('SearchResult missing required field: note_id');
+    }
+    if (!json.containsKey('score') || json['score'] == null) {
+      throw FormatException('SearchResult missing required field: score');
+    }
+
     return SearchResult(
       noteId: json['note_id'] as String,
       score: (json['score'] as num).toDouble(),
@@ -182,13 +190,16 @@ class SearchService {
       
       // Convert raw results to SearchResult objects
       final results = <SearchResult>[];
-      for (final rawResult in rawResults) {
+      for (var i = 0; i < rawResults.length; i++) {
         try {
-          final result = SearchResult.fromJson(rawResult);
+          final result = SearchResult.fromJson(rawResults[i]);
           results.add(result);
         } catch (e) {
-          // Log error but continue processing other results
-          debugPrint('Warning: Failed to parse search result: $e');
+          // Fail fast on malformed results to alert developers to API contract violations
+          throw SearchServiceException(
+            'Failed to parse search result at index $i: ${e.toString()}',
+            cause: e,
+          );
         }
       }
       

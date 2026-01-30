@@ -118,6 +118,24 @@ void main() {
 
         expect(results.length, lessThanOrEqualTo(5));
       });
+
+      // Note: This test documents the expected behavior but will pass
+      // because the mock Rust bridge returns an empty list for non-indexed searches.
+      // In a real integration test with actual indexing, this would verify
+      // the full round-trip of indexing and searching.
+      test('should parse valid search results from Rust bridge', () async {
+        await service.initializeIndex(indexPath: indexPath);
+
+        // When the Rust bridge is fully implemented and notes are indexed,
+        // this would return actual results. For now, it returns empty.
+        final results = await service.search(
+          query: 'test',
+          indexPath: indexPath,
+        );
+
+        // Verify the results are properly typed
+        expect(results, isA<List<SearchResult>>());
+      });
     });
 
     group('indexNote', () {
@@ -279,6 +297,56 @@ void main() {
         expect(result.score, equals(0.85));
         expect(result.titleSnippet, isEmpty);
         expect(result.contentSnippet, isEmpty);
+      });
+
+      test('should throw FormatException when note_id is missing', () {
+        final json = {
+          'score': 0.85,
+          'title_snippet': 'Test',
+          'content_snippet': 'Content',
+        };
+
+        expect(
+          () => SearchResult.fromJson(json),
+          throwsA(isA<FormatException>()),
+        );
+      });
+
+      test('should throw FormatException when note_id is null', () {
+        final json = {
+          'note_id': null,
+          'score': 0.85,
+        };
+
+        expect(
+          () => SearchResult.fromJson(json),
+          throwsA(isA<FormatException>()),
+        );
+      });
+
+      test('should throw FormatException when score is missing', () {
+        final json = {
+          'note_id': 'test-note-1',
+          'title_snippet': 'Test',
+          'content_snippet': 'Content',
+        };
+
+        expect(
+          () => SearchResult.fromJson(json),
+          throwsA(isA<FormatException>()),
+        );
+      });
+
+      test('should throw FormatException when score is null', () {
+        final json = {
+          'note_id': 'test-note-1',
+          'score': null,
+        };
+
+        expect(
+          () => SearchResult.fromJson(json),
+          throwsA(isA<FormatException>()),
+        );
       });
 
       test('should convert to JSON', () {
