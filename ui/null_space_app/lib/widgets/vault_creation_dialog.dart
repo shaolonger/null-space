@@ -31,6 +31,7 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
   String? _errorMessage;
+  int _passwordStrength = 0;
 
   @override
   void dispose() {
@@ -96,16 +97,20 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
 
   /// Validate vault name
   String? _validateName(String? value) {
-    if (value == null || value.isEmpty) {
+    final trimmedValue = value?.trim() ?? '';
+    if (trimmedValue.isEmpty) {
       return 'Vault name is required';
     }
-    if (value.length > 100) {
+    if (trimmedValue.length > 100) {
       return 'Name must be 100 characters or less';
     }
     return null;
   }
 
   /// Validate password
+  /// 
+  /// Note: Password is intentionally NOT trimmed to allow users to include
+  /// leading or trailing whitespace in their passwords if desired.
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Password is required';
@@ -174,7 +179,6 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final passwordStrength = _calculatePasswordStrength(_passwordController.text);
 
     return AlertDialog(
       title: const Text('Create New Vault'),
@@ -237,8 +241,10 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
                 validator: _validatePassword,
                 enabled: !_isLoading,
                 onChanged: (value) {
-                  // Trigger rebuild to update password strength indicator
-                  setState(() {});
+                  // Update password strength
+                  setState(() {
+                    _passwordStrength = _calculatePasswordStrength(value);
+                  });
                 },
               ),
               const SizedBox(height: 8),
@@ -249,17 +255,17 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
                   children: [
                     Expanded(
                       child: LinearProgressIndicator(
-                        value: passwordStrength / 3,
+                        value: _passwordStrength / 3,
                         backgroundColor: Colors.grey[300],
-                        color: _getPasswordStrengthColor(passwordStrength),
+                        color: _getPasswordStrengthColor(_passwordStrength),
                         minHeight: 4,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      _getPasswordStrengthLabel(passwordStrength),
+                      _getPasswordStrengthLabel(_passwordStrength),
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: _getPasswordStrengthColor(passwordStrength),
+                        color: _getPasswordStrengthColor(_passwordStrength),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
