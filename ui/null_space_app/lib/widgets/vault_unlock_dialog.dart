@@ -64,35 +64,25 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
       _isLoading = true;
     });
 
-    try {
-      // Unlock vault using VaultService
-      final success = await widget.vaultService.unlockVault(
-        vault: widget.vault,
-        password: _passwordController.text,
-      );
+    // Unlock vault using VaultService
+    final success = await widget.vaultService.unlockVault(
+      vault: widget.vault,
+      password: _passwordController.text,
+    );
 
-      if (!success) {
-        // Increment failed attempts
-        setState(() {
-          _failedAttempts++;
-          _errorMessage = 'Incorrect password. Please try again.';
-          _isLoading = false;
-        });
-        return;
-      }
+    if (!success) {
+      // Increment failed attempts
+      setState(() {
+        _failedAttempts++;
+        _errorMessage = 'Incorrect password. Please try again.';
+        _isLoading = false;
+      });
+      return;
+    }
 
-      // Close dialog and return success
-      if (mounted) {
-        Navigator.of(context).pop(true);
-      }
-    } catch (e) {
-      // Show error message
-      if (mounted) {
-        setState(() {
-          _errorMessage = 'Failed to unlock vault: ${e.toString()}';
-          _isLoading = false;
-        });
-      }
+    // Close dialog and return success
+    if (mounted) {
+      Navigator.of(context).pop(true);
     }
   }
 

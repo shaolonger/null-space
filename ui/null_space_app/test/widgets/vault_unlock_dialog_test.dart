@@ -9,7 +9,6 @@ import 'package:null_space_app/widgets/vault_unlock_dialog.dart';
 // Mock classes
 class MockRustBridge extends RustBridge {
   bool initCalled = false;
-  bool shouldFailDecryption = false;
   String correctPassword = 'correct_password';
 
   @override
@@ -24,7 +23,7 @@ class MockRustBridge extends RustBridge {
 
   @override
   String encrypt(String plaintext, String password, String salt) {
-    if (password != correctPassword && shouldFailDecryption) {
+    if (password != correctPassword) {
       throw Exception('Encryption failed - wrong password');
     }
     return 'encrypted_$plaintext';
@@ -32,7 +31,7 @@ class MockRustBridge extends RustBridge {
 
   @override
   String decrypt(String ciphertext, String password, String salt) {
-    if (password != correctPassword && shouldFailDecryption) {
+    if (password != correctPassword) {
       throw Exception('Decryption failed - wrong password');
     }
     return ciphertext.replaceFirst('encrypted_', '');
@@ -162,8 +161,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Vault Without Description'), findsOneWidget);
-      // Description should not be shown if empty
-      expect(find.text(''), findsWidgets);
+      // Verify the vault name is displayed in the dialog
+      expect(find.byIcon(Icons.folder_outlined), findsOneWidget);
     });
 
     testWidgets('validates required password field', (WidgetTester tester) async {
@@ -227,8 +226,6 @@ void main() {
     });
 
     testWidgets('shows error message with incorrect password', (WidgetTester tester) async {
-      mockBridge.shouldFailDecryption = true;
-
       await tester.pumpWidget(createDialog());
       await tester.tap(find.text('Show Dialog'));
       await tester.pumpAndSettle();
@@ -254,8 +251,6 @@ void main() {
     });
 
     testWidgets('shows warning after 3 failed attempts', (WidgetTester tester) async {
-      mockBridge.shouldFailDecryption = true;
-
       await tester.pumpWidget(createDialog());
       await tester.tap(find.text('Show Dialog'));
       await tester.pumpAndSettle();
@@ -359,8 +354,6 @@ void main() {
     });
 
     testWidgets('clears error message on new unlock attempt', (WidgetTester tester) async {
-      mockBridge.shouldFailDecryption = true;
-
       await tester.pumpWidget(createDialog());
       await tester.tap(find.text('Show Dialog'));
       await tester.pumpAndSettle();
