@@ -6,21 +6,54 @@ class NoteProvider extends ChangeNotifier {
   List<Note> _notes = [];
   Note? _selectedNote;
   String _searchQuery = '';
+  List<String> _selectedTags = [];
 
   List<Note> get notes => _filteredNotes;
   Note? get selectedNote => _selectedNote;
   String get searchQuery => _searchQuery;
+  List<String> get selectedTags => _selectedTags;
+
+  /// Get all unique tags from all notes
+  List<String> get allTags {
+    final tagSet = <String>{};
+    for (final note in _notes) {
+      tagSet.addAll(note.tags);
+    }
+    return tagSet.toList()..sort();
+  }
+
+  /// Get note counts for each tag
+  Map<String, int> get tagCounts {
+    final counts = <String, int>{};
+    for (final note in _notes) {
+      for (final tag in note.tags) {
+        counts[tag] = (counts[tag] ?? 0) + 1;
+      }
+    }
+    return counts;
+  }
 
   List<Note> get _filteredNotes {
-    if (_searchQuery.isEmpty) {
-      return _notes;
+    var filtered = _notes;
+
+    // Filter by selected tags (AND logic)
+    if (_selectedTags.isNotEmpty) {
+      filtered = filtered.where((note) {
+        return _selectedTags.every((tag) => note.tags.contains(tag));
+      }).toList();
     }
-    return _notes.where((note) {
+
+    // Filter by search query
+    if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
-      return note.title.toLowerCase().contains(query) ||
-          note.content.toLowerCase().contains(query) ||
-          note.tags.any((tag) => tag.toLowerCase().contains(query));
-    }).toList();
+      filtered = filtered.where((note) {
+        return note.title.toLowerCase().contains(query) ||
+            note.content.toLowerCase().contains(query) ||
+            note.tags.any((tag) => tag.toLowerCase().contains(query));
+      }).toList();
+    }
+
+    return filtered;
   }
 
   void setNotes(List<Note> notes) {
@@ -59,6 +92,17 @@ class NoteProvider extends ChangeNotifier {
 
   void setSearchQuery(String query) {
     _searchQuery = query;
+    notifyListeners();
+  }
+
+  void setSelectedTags(List<String> tags) {
+    _selectedTags = tags;
+    notifyListeners();
+  }
+
+  void clearFilters() {
+    _searchQuery = '';
+    _selectedTags = [];
     notifyListeners();
   }
 }
