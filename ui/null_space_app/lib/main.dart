@@ -8,7 +8,13 @@ import 'services/search_service.dart';
 import 'bridge/rust_bridge.dart';
 import 'models/note.dart';
 
+// Global RustBridge instance (singleton pattern)
+final _rustBridge = RustBridge();
+
 void main() {
+  // Initialize Rust bridge once at startup
+  _rustBridge.init();
+  
   runApp(const NullSpaceApp());
 }
 
@@ -17,10 +23,6 @@ class NullSpaceApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize Rust bridge
-    final rustBridge = RustBridge();
-    rustBridge.init();
-    
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => VaultProvider()),
@@ -34,7 +36,7 @@ class NullSpaceApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => SearchProvider(
-            searchService: SearchService(bridge: rustBridge),
+            searchService: SearchService(bridge: _rustBridge),
           ),
         ),
       ],

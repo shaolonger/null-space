@@ -35,7 +35,9 @@ class _SearchScreenState extends State<SearchScreen> {
 
     // Create new timer for debounced search
     _debounceTimer = Timer(const Duration(milliseconds: _debounceDelay), () {
-      // TODO: Replace with actual index path from vault
+      // TODO: Replace with actual index path from VaultProvider
+      // The index path should be obtained from the active vault's configuration
+      // Example: context.read<VaultProvider>().activeVault?.indexPath ?? '/tmp/search-index'
       final indexPath = '/tmp/search-index';
       context.read<SearchProvider>().search(query, indexPath);
     });
@@ -66,7 +68,11 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
     );
 
-    // TODO: Replace with actual vault credentials
+    // TODO: Replace with actual vault credentials from VaultProvider
+    // SECURITY WARNING: These hard-coded credentials are for DEVELOPMENT ONLY
+    // In production, vault credentials must be obtained from VaultProvider
+    // Example: final vault = context.read<VaultProvider>().activeVault;
+    // assert(vault != null, 'No active vault for opening note');
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => NoteEditorScreen(

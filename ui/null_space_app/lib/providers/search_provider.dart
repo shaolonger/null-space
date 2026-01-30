@@ -26,11 +26,13 @@ class SearchProvider extends ChangeNotifier {
 
   /// Perform search with the given query
   Future<void> search(String query, String indexPath, {int limit = 20}) async {
-    _query = query;
+    // Trim query for consistency
+    final trimmedQuery = query.trim();
+    _query = trimmedQuery;
     _errorMessage = null;
 
     // Clear results if query is empty
-    if (query.trim().isEmpty) {
+    if (trimmedQuery.isEmpty) {
       _searchResults = [];
       notifyListeners();
       return;
@@ -42,14 +44,14 @@ class SearchProvider extends ChangeNotifier {
     try {
       // Perform the search
       _searchResults = await _searchService.search(
-        query: query.trim(),
+        query: trimmedQuery,
         indexPath: indexPath,
         limit: limit,
       );
 
       // Add to search history if we got results
       if (_searchResults.isNotEmpty) {
-        _addToHistory(query.trim());
+        _addToHistory(trimmedQuery);
       }
     } catch (e) {
       _errorMessage = e.toString();
