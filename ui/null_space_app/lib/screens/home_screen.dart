@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'note_editor_screen.dart';
 
 /// Home screen with navigation
 class HomeScreen extends StatefulWidget {
@@ -17,6 +18,20 @@ class _HomeScreenState extends State<HomeScreen> {
     const VaultScreen(),
   ];
 
+  void _navigateToNoteEditor() {
+    // TODO: Replace with actual vault credentials from VaultProvider
+    // For now, using placeholder values for development
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const NoteEditorScreen(
+          vaultPath: '/tmp/default-vault',
+          vaultPassword: 'development',
+          vaultSalt: 'development-salt',
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,6 +40,13 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 2,
       ),
       body: _screens[_selectedIndex],
+      floatingActionButton: _selectedIndex == 0
+          ? FloatingActionButton(
+              onPressed: _navigateToNoteEditor,
+              tooltip: 'Create Note',
+              child: const Icon(Icons.add),
+            )
+          : null,
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (index) {
