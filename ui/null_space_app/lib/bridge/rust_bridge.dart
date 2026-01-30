@@ -73,6 +73,25 @@ class FFIException implements Exception {
 }
 
 /// Rust bridge interface
+/// 
+/// This class provides access to Rust core functionality via FFI.
+/// 
+/// **Thread Safety**: This class is not thread-safe and should only be accessed
+/// from a single isolate. If you need to use it from multiple isolates, create
+/// a separate instance in each isolate.
+/// 
+/// **Resource Management**: Always call `init()` before using any methods and
+/// `dispose()` when done to prevent memory leaks. Consider using this class
+/// with try-finally blocks:
+/// ```dart
+/// final bridge = RustBridge();
+/// try {
+///   bridge.init();
+///   // Use bridge methods
+/// } finally {
+///   bridge.dispose();
+/// }
+/// ```
 class RustBridge {
   late final DynamicLibrary _dylib;
   Pointer<Void>? _context;
@@ -150,9 +169,9 @@ class RustBridge {
   }
 
   /// Convert a native UTF-8 string to a Dart string and free the native string
-  String _fromNativeString(Pointer<Utf8> ptr) {
+  String _fromNativeString(Pointer<Utf8> ptr, String operation) {
     if (ptr == nullptr) {
-      throw FFIException('Received null pointer from Rust');
+      throw FFIException('$operation failed: Received null pointer from Rust');
     }
     try {
       final str = ptr.toDartString();
@@ -162,10 +181,38 @@ class RustBridge {
     }
   }
 
+  /// Translate export vault error codes to descriptive messages
+  String _exportVaultErrorMessage(int errorCode) {
+    switch (errorCode) {
+      case -1:
+        return 'Null pointer in one or more parameters';
+      case -2:
+        return 'Invalid vault JSON string encoding';
+      case -3:
+        return 'Invalid notes JSON string encoding';
+      case -4:
+        return 'Invalid output path string encoding';
+      case -5:
+        return 'Invalid password string encoding';
+      case -6:
+        return 'Failed to parse vault JSON';
+      case -7:
+        return 'Failed to parse notes JSON';
+      case -8:
+        return 'Failed to create encryption manager';
+      case -9:
+        return 'Failed to create file storage';
+      case -10:
+        return 'Failed to export vault';
+      default:
+        return 'Unknown error (code: $errorCode)';
+    }
+  }
+
   /// Generate a random salt for key derivation
   String generateSalt() {
     final saltPtr = _generateSaltFunc();
-    return _fromNativeString(saltPtr);
+    return _fromNativeString(saltPtr, 'Generate salt');
   }
 
   /// Encrypt data with a password and salt
@@ -178,7 +225,7 @@ class RustBridge {
 
     try {
       final resultPtr = _encryptFunc(dataPtr, passwordPtr, saltPtr);
-      return _fromNativeString(resultPtr);
+      return _fromNativeString(resultPtr, 'Encryption');
     } finally {
       malloc.free(dataPtr);
       malloc.free(passwordPtr);
@@ -189,14 +236,14 @@ class RustBridge {
   /// Decrypt data with a password and salt
   /// 
   /// Takes a base64-encoded encrypted string and returns the decrypted plaintext.
-  String decrypt(String encrypted, String password, String salt) {
-    final encryptedPtr = _toNativeString(encrypted);
+  String decrypt(String encryptedData, String password, String salt) {
+    final encryptedPtr = _toNativeString(encryptedData);
     final passwordPtr = _toNativeString(password);
     final saltPtr = _toNativeString(salt);
 
     try {
       final resultPtr = _decryptFunc(encryptedPtr, passwordPtr, saltPtr);
-      return _fromNativeString(resultPtr);
+      return _fromNativeString(resultPtr, 'Decryption');
     } finally {
       malloc.free(encryptedPtr);
       malloc.free(passwordPtr);
@@ -215,9 +262,16 @@ class RustBridge {
 
     try {
       final resultPtr = _createNoteFunc(titlePtr, contentPtr, tagsPtr);
-      final jsonString = _fromNativeString(resultPtr);
-      final json = jsonDecode(jsonString) as Map<String, dynamic>;
-      return Note.fromJson(json);
+      final jsonString = _fromNativeString(resultPtr, 'Create note');
+      final decoded = jsonDecode(jsonString);
+      if (decoded is! Map<String, dynamic>) {
+        throw FFIException(
+            'Create note failed: Expected JSON object, got ${decoded.runtimeType}');
+      }
+      return Note.fromJson(decoded);
+    } catch (e) {
+      if (e is FFIException) rethrow;
+      throw FFIException('Create note failed: $e');
     } finally {
       malloc.free(titlePtr);
       malloc.free(contentPtr);
@@ -235,9 +289,16 @@ class RustBridge {
 
     try {
       final resultPtr = _updateNoteFunc(notePtr);
-      final jsonString = _fromNativeString(resultPtr);
-      final json = jsonDecode(jsonString) as Map<String, dynamic>;
-      return Note.fromJson(json);
+      final jsonString = _fromNativeString(resultPtr, 'Update note');
+      final decoded = jsonDecode(jsonString);
+      if (decoded is! Map<String, dynamic>) {
+        throw FFIException(
+            'Update note failed: Expected JSON object, got ${decoded.runtimeType}');
+      }
+      return Note.fromJson(decoded);
+    } catch (e) {
+      if (e is FFIException) rethrow;
+      throw FFIException('Update note failed: $e');
     } finally {
       malloc.free(notePtr);
     }
@@ -253,9 +314,25 @@ class RustBridge {
 
     try {
       final resultPtr = _searchFunc(indexPathPtr, queryPtr, limit);
-      final jsonString = _fromNativeString(resultPtr);
-      final results = jsonDecode(jsonString) as List<dynamic>;
-      return results.cast<Map<String, dynamic>>();
+      final jsonString = _fromNativeString(resultPtr, 'Search');
+      final decoded = jsonDecode(jsonString);
+      if (decoded is! List) {
+        throw FFIException(
+            'Search failed: Expected JSON array, got ${decoded.runtimeType}');
+      }
+      // Validate that all items are maps
+      final results = <Map<String, dynamic>>[];
+      for (var i = 0; i < decoded.length; i++) {
+        if (decoded[i] is! Map<String, dynamic>) {
+          throw FFIException(
+              'Search failed: Expected object at index $i, got ${decoded[i].runtimeType}');
+        }
+        results.add(decoded[i] as Map<String, dynamic>);
+      }
+      return results;
+    } catch (e) {
+      if (e is FFIException) rethrow;
+      throw FFIException('Search failed: $e');
     } finally {
       malloc.free(indexPathPtr);
       malloc.free(queryPtr);
@@ -264,7 +341,7 @@ class RustBridge {
 
   /// Export a vault to a ZIP file
   /// 
-  /// Returns true on success, throws FFIException on error.
+  /// Returns true on success, throws FFIException on error with detailed message.
   bool exportVault(
       Vault vault, List<Note> notes, String outputPath, String password) {
     final vaultJson = jsonEncode(vault.toJson());
@@ -280,7 +357,8 @@ class RustBridge {
       final result =
           _exportVaultFunc(vaultPtr, notesPtr, outputPathPtr, passwordPtr);
       if (result != 0) {
-        throw FFIException('Failed to export vault (error code: $result)');
+        final errorMsg = _exportVaultErrorMessage(result);
+        throw FFIException('Export vault failed: $errorMsg');
       }
       return true;
     } finally {
@@ -293,32 +371,62 @@ class RustBridge {
 
   /// Import a vault from a ZIP file
   /// 
-  /// Returns a map containing the vault and notes:
-  /// ```dart
-  /// {
-  ///   'vault': Vault,
-  ///   'notes': List<Note>
-  /// }
-  /// ```
+  /// Returns a map containing the vault and notes.
+  /// 
+  /// The returned map has two keys:
+  /// - 'vault': A [Vault] object with the vault metadata
+  /// - 'notes': A [List<Note>] containing all notes from the vault
   Map<String, dynamic> importVault(String inputPath, String password) {
     final inputPathPtr = _toNativeString(inputPath);
     final passwordPtr = _toNativeString(password);
 
     try {
       final resultPtr = _importVaultFunc(inputPathPtr, passwordPtr);
-      final jsonString = _fromNativeString(resultPtr);
-      final json = jsonDecode(jsonString) as Map<String, dynamic>;
+      final jsonString = _fromNativeString(resultPtr, 'Import vault');
+      final decoded = jsonDecode(jsonString);
+      
+      if (decoded is! Map<String, dynamic>) {
+        throw FFIException(
+            'Import vault failed: Expected JSON object, got ${decoded.runtimeType}');
+      }
 
-      final vault = Vault.fromJson(json['vault'] as Map<String, dynamic>);
-      final notesList = json['notes'] as List<dynamic>;
-      final notes = notesList
-          .map((n) => Note.fromJson(n as Map<String, dynamic>))
-          .toList();
+      // Validate structure
+      if (!decoded.containsKey('vault')) {
+        throw FFIException('Import vault failed: Missing "vault" key in response');
+      }
+      if (!decoded.containsKey('notes')) {
+        throw FFIException('Import vault failed: Missing "notes" key in response');
+      }
+
+      final vaultData = decoded['vault'];
+      if (vaultData is! Map<String, dynamic>) {
+        throw FFIException(
+            'Import vault failed: Expected vault object, got ${vaultData.runtimeType}');
+      }
+
+      final notesData = decoded['notes'];
+      if (notesData is! List) {
+        throw FFIException(
+            'Import vault failed: Expected notes array, got ${notesData.runtimeType}');
+      }
+
+      final vault = Vault.fromJson(vaultData);
+      final notes = <Note>[];
+      for (var i = 0; i < notesData.length; i++) {
+        if (notesData[i] is! Map<String, dynamic>) {
+          throw FFIException(
+              'Import vault failed: Expected note object at index $i, got ${notesData[i].runtimeType}');
+        }
+        notes.add(Note.fromJson(notesData[i] as Map<String, dynamic>));
+      }
 
       return {
         'vault': vault,
         'notes': notes,
       };
+    } catch (e) {
+      if (e is FFIException) rethrow;
+      throw FFIException('Import vault failed: $e');
     } finally {
       malloc.free(inputPathPtr);
       malloc.free(passwordPtr);
