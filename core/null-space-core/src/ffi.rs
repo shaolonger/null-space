@@ -255,8 +255,13 @@ pub extern "C" fn null_space_create_note(
 /// * `note_json` - JSON representation of the note to update (null-terminated C string)
 /// 
 /// # Returns
-/// JSON representation of the updated note, or null on error.
+/// JSON representation of the updated note with incremented version and timestamp, or null on error.
 /// The returned string must be freed with null_space_free_string.
+/// 
+/// # Note
+/// This function expects the full note JSON with the updated title, content, and tags.
+/// It will increment the version number and update the timestamp automatically.
+/// The caller should modify the note object on their side before calling this function.
 #[no_mangle]
 pub extern "C" fn null_space_update_note(note_json: *const c_char) -> *mut c_char {
     // Validate input pointer
@@ -364,7 +369,17 @@ pub extern "C" fn null_space_search(
 /// * `password` - Password for encrypting the vault (null-terminated C string)
 /// 
 /// # Returns
-/// 0 on success, non-zero error code on failure
+/// 0 on success, negative error code on failure:
+/// * -1: Null pointer in one or more parameters
+/// * -2: Invalid vault_json string encoding
+/// * -3: Invalid notes_json string encoding
+/// * -4: Invalid output_path string encoding
+/// * -5: Invalid password string encoding
+/// * -6: Failed to parse vault JSON
+/// * -7: Failed to parse notes JSON
+/// * -8: Failed to create encryption manager
+/// * -9: Failed to create file storage
+/// * -10: Failed to export vault
 #[no_mangle]
 pub extern "C" fn null_space_export_vault(
     vault_json: *const c_char,
@@ -443,7 +458,7 @@ pub extern "C" fn null_space_export_vault(
 /// 
 /// # Arguments
 /// * `input_path` - Path to the ZIP file to import (null-terminated C string)
-/// * `password` - Password for decrypting the vault (null-terminated C string)
+/// * `password` - Password for decrypting the vault (null-terminated C string, currently unused)
 /// 
 /// # Returns
 /// JSON string with vault metadata and notes, or null on error.
@@ -456,6 +471,12 @@ pub extern "C" fn null_space_export_vault(
 ///   "notes": [ ... ]
 /// }
 /// ```
+/// 
+/// # Note on Encryption
+/// Currently, this function imports vaults without decryption.
+/// The password parameter is reserved for future use when vault-level encryption is implemented.
+/// Individual notes can still be encrypted/decrypted using the vault's salt and the provided password
+/// via the null_space_decrypt function after import.
 #[no_mangle]
 pub extern "C" fn null_space_import_vault(
     input_path: *const c_char,
@@ -623,6 +644,57 @@ mod tests {
         assert_eq!(note.tags, vec!["tag1", "tag2"]);
         
         null_space_free_string(note_ptr);
+    }
+
+    #[test]
+    fn test_update_note() {
+        // First create a note
+        let title = CString::new("Original Title").unwrap();
+        let content = CString::new("Original content").unwrap();
+        let tags = CString::new(r#"["tag1"]"#).unwrap();
+        
+        let note_ptr = null_space_create_note(
+            title.as_ptr(),
+            content.as_ptr(),
+            tags.as_ptr(),
+        );
+        assert!(!note_ptr.is_null());
+        
+        let note_json = unsafe {
+            CStr::from_ptr(note_ptr).to_string_lossy().to_string()
+        };
+        
+        let mut note: Note = serde_json::from_str(&note_json).unwrap();
+        let original_version = note.version;
+        
+        // Modify the note
+        note.title = "Updated Title".to_string();
+        note.content = "Updated content".to_string();
+        note.tags = vec!["tag1".to_string(), "tag2".to_string()];
+        
+        let modified_json = serde_json::to_string(&note).unwrap();
+        let modified_json_cstr = CString::new(modified_json).unwrap();
+        
+        // Update the note
+        let updated_ptr = null_space_update_note(modified_json_cstr.as_ptr());
+        assert!(!updated_ptr.is_null());
+        
+        let updated_json = unsafe {
+            CStr::from_ptr(updated_ptr).to_string_lossy().to_string()
+        };
+        
+        let updated_note: Note = serde_json::from_str(&updated_json).unwrap();
+        
+        // Verify the update
+        assert_eq!(updated_note.title, "Updated Title");
+        assert_eq!(updated_note.content, "Updated content");
+        assert_eq!(updated_note.tags, vec!["tag1", "tag2"]);
+        assert_eq!(updated_note.version, original_version + 1);
+        assert!(updated_note.updated_at > note.created_at);
+        
+        // Cleanup
+        null_space_free_string(note_ptr);
+        null_space_free_string(updated_ptr);
     }
 
     #[test]
