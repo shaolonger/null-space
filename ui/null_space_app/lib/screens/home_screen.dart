@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'note_editor_screen.dart';
+import 'notes_list_screen.dart';
 
 /// Home screen with navigation
 class HomeScreen extends StatefulWidget {
@@ -67,30 +68,6 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.folder),
             label: 'Vault',
           ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Notes list screen placeholder
-class NotesListScreen extends StatelessWidget {
-  const NotesListScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.note_add, size: 64, color: Colors.grey),
-          const SizedBox(height: 16),
-          Text(
-            'No notes yet',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          const Text('Tap + to create your first note'),
         ],
       ),
     );
