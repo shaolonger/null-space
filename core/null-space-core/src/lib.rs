@@ -12,6 +12,7 @@ pub mod search;
 pub mod storage;
 pub mod vault;
 pub mod models;
+pub mod ffi;
 
 pub use crypto::{EncryptionManager, EncryptionError};
 pub use search::{SearchEngine, SearchError};
