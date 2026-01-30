@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../models/note.dart';
+import '../utils/date_formatter.dart';
 
 /// Reusable note card widget for displaying notes in list view
 class NoteCard extends StatelessWidget {
@@ -133,23 +133,6 @@ class NoteCard extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inDays == 0) {
-      if (difference.inHours == 0) {
-        if (difference.inMinutes == 0) {
-          return 'just now';
-        }
-        return '${difference.inMinutes}m ago';
-      }
-      return '${difference.inHours}h ago';
-    } else if (difference.inDays == 1) {
-      return 'yesterday';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays}d ago';
-    } else {
-      return DateFormat.yMMMd().format(date);
-    }
+    return DateFormatter.formatRelativeDate(date);
   }
 }
