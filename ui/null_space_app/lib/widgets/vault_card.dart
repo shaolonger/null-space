@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../models/vault.dart';
+import '../utils/date_formatter.dart';
 
 /// Reusable vault card widget for displaying vaults in list view
 class VaultCard extends StatelessWidget {
@@ -9,6 +9,7 @@ class VaultCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onDelete;
   final VoidCallback onExport;
+  final VoidCallback? onRename;
   final bool isSelected;
   final int? noteCount;
 
@@ -19,6 +20,7 @@ class VaultCard extends StatelessWidget {
     required this.onTap,
     required this.onDelete,
     required this.onExport,
+    this.onRename,
     this.isSelected = false,
     this.noteCount,
   });
@@ -73,38 +75,7 @@ class VaultCard extends StatelessWidget {
                       tooltip: 'Vault actions',
                       padding: EdgeInsets.zero,
                       onSelected: (value) => _handleMenuAction(context, value),
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'export',
-                          child: Row(
-                            children: [
-                              Icon(Icons.download, size: 18),
-                              SizedBox(width: 8),
-                              Text('Export'),
-                            ],
-                          ),
-                        ),
-                        const PopupMenuItem(
-                          value: 'rename',
-                          child: Row(
-                            children: [
-                              Icon(Icons.edit, size: 18),
-                              SizedBox(width: 8),
-                              Text('Rename'),
-                            ],
-                          ),
-                        ),
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete_outline, size: 18, color: Colors.red),
-                              SizedBox(width: 8),
-                              Text('Delete', style: TextStyle(color: Colors.red)),
-                            ],
-                          ),
-                        ),
-                      ],
+                      itemBuilder: (context) => _buildMenuItems(colorScheme),
                     ),
                   ],
                 ),
@@ -174,21 +145,19 @@ class VaultCard extends StatelessWidget {
     );
   }
 
-  void _showContextMenu(BuildContext context) {
-    showMenu(
-      context: context,
-      position: RelativeRect.fill,
-      items: [
-        const PopupMenuItem(
-          value: 'export',
-          child: Row(
-            children: [
-              Icon(Icons.download, size: 18),
-              SizedBox(width: 8),
-              Text('Export'),
-            ],
-          ),
+  List<PopupMenuEntry<String>> _buildMenuItems(ColorScheme colorScheme) {
+    return [
+      const PopupMenuItem(
+        value: 'export',
+        child: Row(
+          children: [
+            Icon(Icons.download, size: 18),
+            SizedBox(width: 8),
+            Text('Export'),
+          ],
         ),
+      ),
+      if (onRename != null)
         const PopupMenuItem(
           value: 'rename',
           child: Row(
@@ -199,17 +168,25 @@ class VaultCard extends StatelessWidget {
             ],
           ),
         ),
-        const PopupMenuItem(
-          value: 'delete',
-          child: Row(
-            children: [
-              Icon(Icons.delete_outline, size: 18, color: Colors.red),
-              SizedBox(width: 8),
-              Text('Delete', style: TextStyle(color: Colors.red)),
-            ],
-          ),
+      PopupMenuItem(
+        value: 'delete',
+        child: Row(
+          children: [
+            Icon(Icons.delete_outline, size: 18, color: colorScheme.error),
+            const SizedBox(width: 8),
+            Text('Delete', style: TextStyle(color: colorScheme.error)),
+          ],
         ),
-      ],
+      ),
+    ];
+  }
+
+  void _showContextMenu(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    showMenu(
+      context: context,
+      position: RelativeRect.fill,
+      items: _buildMenuItems(colorScheme),
     ).then((value) {
       if (value != null) {
         _handleMenuAction(context, value);
@@ -223,12 +200,9 @@ class VaultCard extends StatelessWidget {
         onExport();
         break;
       case 'rename':
-        // TODO: Implement rename functionality
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Rename feature coming soon'),
-          ),
-        );
+        if (onRename != null) {
+          onRename!();
+        }
         break;
       case 'delete':
         _confirmDelete(context);
@@ -237,6 +211,7 @@ class VaultCard extends StatelessWidget {
   }
 
   void _confirmDelete(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -255,7 +230,7 @@ class VaultCard extends StatelessWidget {
               onDelete();
             },
             style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
+              foregroundColor: colorScheme.error,
             ),
             child: const Text('Delete'),
           ),
@@ -265,23 +240,6 @@ class VaultCard extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inDays == 0) {
-      if (difference.inHours == 0) {
-        if (difference.inMinutes == 0) {
-          return 'just now';
-        }
-        return '${difference.inMinutes}m ago';
-      }
-      return '${difference.inHours}h ago';
-    } else if (difference.inDays == 1) {
-      return 'yesterday';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays}d ago';
-    } else {
-      return DateFormat.yMMMd().format(date);
-    }
+    return DateFormatter.formatRelativeDate(date);
   }
 }
