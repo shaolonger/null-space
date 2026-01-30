@@ -50,37 +50,45 @@ class _VaultScreenState extends State<VaultScreen> {
       // Load vaults
       final vaults = await vaultService.listVaults();
       
-      setState(() {
-        _vaultService = vaultService;
-        _vaults = vaults;
-        _isInitializing = false;
-      });
+      if (mounted) {
+        setState(() {
+          _vaultService = vaultService;
+          _vaults = vaults;
+          _isInitializing = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _initError = e.toString();
-        _isInitializing = false;
-      });
+      if (mounted) {
+        setState(() {
+          _initError = e.toString();
+          _isInitializing = false;
+        });
+      }
     }
   }
 
   Future<void> _refreshVaults() async {
     if (_vaultService == null) return;
     
-    setState(() {
-      _isLoading = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
 
     try {
       final vaults = await _vaultService!.listVaults();
-      setState(() {
-        _vaults = vaults;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
       if (mounted) {
+        setState(() {
+          _vaults = vaults;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
         _showErrorSnackBar('Failed to load vaults: ${e.toString()}');
       }
     }
@@ -158,28 +166,30 @@ class _VaultScreenState extends State<VaultScreen> {
   Future<void> _handleDeleteVault(Vault vault) async {
     if (_vaultService == null) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
 
     try {
       await _vaultService!.deleteVault(vaultId: vault.id);
       
-      // Update provider
-      final vaultProvider = Provider.of<VaultProvider>(context, listen: false);
-      vaultProvider.removeVault(vault.id);
-      
-      // Refresh list
-      await _refreshVaults();
-      
       if (mounted) {
+        // Update provider
+        final vaultProvider = Provider.of<VaultProvider>(context, listen: false);
+        vaultProvider.removeVault(vault.id);
+        
+        // Refresh list
+        await _refreshVaults();
+        
         _showSuccessSnackBar('Vault "${vault.name}" deleted');
       }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
       if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
         _showErrorSnackBar('Failed to delete vault: ${e.toString()}');
       }
     }
@@ -207,9 +217,11 @@ class _VaultScreenState extends State<VaultScreen> {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
 
     try {
       final password = _vaultService!.getVaultPassword(vault.id);
@@ -227,18 +239,17 @@ class _VaultScreenState extends State<VaultScreen> {
         password: password,
       );
 
-      setState(() {
-        _isLoading = false;
-      });
-
       if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
         _showSuccessSnackBar('Vault exported to: $outputPath');
       }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
       if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
         _showErrorSnackBar('Failed to export vault: ${e.toString()}');
       }
     }
@@ -271,40 +282,28 @@ class _VaultScreenState extends State<VaultScreen> {
 
     // Prompt for password
     final passwordController = TextEditingController();
+    
+    if (!mounted) return;
+    
     final password = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Import Vault'),
-        content: TextField(
-          controller: passwordController,
-          decoration: const InputDecoration(
-            labelText: 'Vault Password',
-            hintText: 'Enter the vault password',
-            border: OutlineInputBorder(),
-          ),
-          obscureText: true,
-          autofocus: true,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(passwordController.text),
-            child: const Text('Import'),
-          ),
-        ],
+      builder: (context) => _ImportPasswordDialog(
+        controller: passwordController,
       ),
     );
+
+    // Dispose controller after dialog closes
+    passwordController.dispose();
 
     if (password == null || password.isEmpty) {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
 
     try {
       final (vault, notes) = await _vaultService!.importVault(
@@ -312,23 +311,23 @@ class _VaultScreenState extends State<VaultScreen> {
         password: password,
       );
 
-      // Update provider
-      final vaultProvider = Provider.of<VaultProvider>(context, listen: false);
-      vaultProvider.addVault(vault);
-      
-      // Refresh list
-      await _refreshVaults();
-
       if (mounted) {
+        // Update provider
+        final vaultProvider = Provider.of<VaultProvider>(context, listen: false);
+        vaultProvider.addVault(vault);
+        
+        // Refresh list
+        await _refreshVaults();
+
         _showSuccessSnackBar(
           'Vault "${vault.name}" imported successfully with ${notes.length} notes!',
         );
       }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
       if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
         _showErrorSnackBar('Failed to import vault: ${e.toString()}');
       }
     }
@@ -338,54 +337,31 @@ class _VaultScreenState extends State<VaultScreen> {
     final nameController = TextEditingController(text: vault.name);
     final descriptionController = TextEditingController(text: vault.description);
 
+    if (!mounted) return;
+    
     final result = await showDialog<Map<String, String>>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Rename Vault'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Vault Name',
-                border: OutlineInputBorder(),
-              ),
-              autofocus: true,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 2,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.of(context).pop({
-                'name': nameController.text,
-                'description': descriptionController.text,
-              });
-            },
-            child: const Text('Save'),
-          ),
-        ],
+      builder: (context) => _RenameVaultDialog(
+        nameController: nameController,
+        descriptionController: descriptionController,
       ),
     );
 
+    // Dispose controllers after dialog closes
+    nameController.dispose();
+    descriptionController.dispose();
+
     if (result != null && mounted) {
+      // Validate name is not empty
+      final newName = result['name']?.trim() ?? '';
+      if (newName.isEmpty) {
+        _showErrorSnackBar('Vault name cannot be empty');
+        return;
+      }
+
       final updatedVault = Vault(
         id: vault.id,
-        name: result['name'] ?? vault.name,
+        name: newName,
         description: result['description'] ?? vault.description,
         createdAt: vault.createdAt,
         updatedAt: DateTime.now(),
@@ -552,6 +528,97 @@ class _VaultScreenState extends State<VaultScreen> {
               child: CircularProgressIndicator(),
             ),
           ),
+      ],
+    );
+  }
+}
+
+/// Dialog for importing a vault with password input
+class _ImportPasswordDialog extends StatelessWidget {
+  final TextEditingController controller;
+
+  const _ImportPasswordDialog({
+    required this.controller,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Import Vault'),
+      content: TextField(
+        controller: controller,
+        decoration: const InputDecoration(
+          labelText: 'Vault Password',
+          hintText: 'Enter the vault password',
+          border: OutlineInputBorder(),
+        ),
+        obscureText: true,
+        autofocus: true,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(controller.text),
+          child: const Text('Import'),
+        ),
+      ],
+    );
+  }
+}
+
+/// Dialog for renaming a vault
+class _RenameVaultDialog extends StatelessWidget {
+  final TextEditingController nameController;
+  final TextEditingController descriptionController;
+
+  const _RenameVaultDialog({
+    required this.nameController,
+    required this.descriptionController,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Rename Vault'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: nameController,
+            decoration: const InputDecoration(
+              labelText: 'Vault Name',
+              border: OutlineInputBorder(),
+            ),
+            autofocus: true,
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: descriptionController,
+            decoration: const InputDecoration(
+              labelText: 'Description',
+              border: OutlineInputBorder(),
+            ),
+            maxLines: 2,
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () {
+            Navigator.of(context).pop({
+              'name': nameController.text,
+              'description': descriptionController.text,
+            });
+          },
+          child: const Text('Save'),
+        ),
       ],
     );
   }
