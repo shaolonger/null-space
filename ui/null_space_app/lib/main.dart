@@ -3,9 +3,18 @@ import 'package:provider/provider.dart';
 import 'screens/home_screen.dart';
 import 'providers/vault_provider.dart';
 import 'providers/note_provider.dart';
+import 'providers/search_provider.dart';
+import 'services/search_service.dart';
+import 'bridge/rust_bridge.dart';
 import 'models/note.dart';
 
+// Global RustBridge instance (singleton pattern)
+final _rustBridge = RustBridge();
+
 void main() {
+  // Initialize Rust bridge once at startup
+  _rustBridge.init();
+  
   runApp(const NullSpaceApp());
 }
 
@@ -24,6 +33,11 @@ class NullSpaceApp extends StatelessWidget {
             _addSampleNotes(provider);
             return provider;
           },
+        ),
+        ChangeNotifierProvider(
+          create: (_) => SearchProvider(
+            searchService: SearchService(bridge: _rustBridge),
+          ),
         ),
       ],
       child: MaterialApp(

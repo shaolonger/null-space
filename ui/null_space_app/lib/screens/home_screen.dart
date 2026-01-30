@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'note_editor_screen.dart';
 import 'notes_list_screen.dart';
 import 'vault_screen.dart';
+import 'search_screen.dart';
 import '../providers/vault_provider.dart';
 
 /// Home screen with navigation
@@ -70,37 +71,6 @@ class _HomeScreenState extends State<HomeScreen> {
           NavigationDestination(
             icon: Icon(Icons.folder),
             label: 'Vault',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Search screen placeholder
-class SearchScreen extends StatelessWidget {
-  const SearchScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          TextField(
-            decoration: InputDecoration(
-              hintText: 'Search notes...',
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Expanded(
-            child: Center(
-              child: Text('Enter search query to find notes'),
-            ),
           ),
         ],
       ),
