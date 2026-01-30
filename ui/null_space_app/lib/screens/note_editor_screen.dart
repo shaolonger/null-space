@@ -6,6 +6,7 @@ import '../providers/note_provider.dart';
 import '../services/note_service.dart';
 import '../services/file_storage.dart';
 import '../bridge/rust_bridge.dart';
+import '../widgets/tag_input_widget.dart';
 
 /// Note Editor Screen for creating and editing notes
 /// 
@@ -44,7 +45,6 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
-  final _tagController = TextEditingController();
   
   final List<String> _tags = [];
   bool _isPreviewMode = false;
@@ -108,7 +108,6 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     _contentController.removeListener(_onFieldChanged);
     _titleController.dispose();
     _contentController.dispose();
-    _tagController.dispose();
     super.dispose();
   }
 
@@ -120,22 +119,11 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     }
   }
 
-  /// Add a tag to the list
-  void _addTag(String tag) {
-    final trimmedTag = tag.trim();
-    if (trimmedTag.isNotEmpty && !_tags.contains(trimmedTag)) {
-      setState(() {
-        _tags.add(trimmedTag);
-        _tagController.clear();
-        _hasUnsavedChanges = true;
-      });
-    }
-  }
-
-  /// Remove a tag from the list
-  void _removeTag(String tag) {
+  /// Handle tags changed from TagInputWidget
+  void _handleTagsChanged(List<String> newTags) {
     setState(() {
-      _tags.remove(tag);
+      _tags.clear();
+      _tags.addAll(newTags);
       _hasUnsavedChanges = true;
     });
   }
@@ -489,42 +477,16 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                             ),
                             const SizedBox(height: 8),
                             
-                            // Tag input
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextField(
-                                    controller: _tagController,
-                                    decoration: const InputDecoration(
-                                      hintText: 'Add tag (e.g., work/project)',
-                                      border: OutlineInputBorder(),
-                                      isDense: true,
-                                    ),
-                                    onSubmitted: _addTag,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                ElevatedButton(
-                                  onPressed: () => _addTag(_tagController.text),
-                                  child: const Text('Add'),
-                                ),
-                              ],
+                            // Tag input widget with autocomplete
+                            Consumer<NoteProvider>(
+                              builder: (context, noteProvider, _) {
+                                return TagInputWidget(
+                                  availableTags: noteProvider.allTags,
+                                  selectedTags: _tags,
+                                  onTagsChanged: _handleTagsChanged,
+                                );
+                              },
                             ),
-                            const SizedBox(height: 8),
-                            
-                            // Tag chips
-                            if (_tags.isNotEmpty)
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: _tags.map((tag) {
-                                  return Chip(
-                                    label: Text(tag),
-                                    deleteIcon: const Icon(Icons.close, size: 18),
-                                    onDeleted: () => _removeTag(tag),
-                                  );
-                                }).toList(),
-                              ),
                           ],
                         ),
                       ),
