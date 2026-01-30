@@ -66,7 +66,8 @@ for target_pair in "${TARGETS[@]}"; do
     
     if [ "$USE_CARGO_NDK" = true ]; then
         # Build using cargo-ndk (automatically handles NDK paths)
-        cargo ndk --target "$rust_target" --platform 21 build --release
+        # Note: cargo-ndk expects Android architecture names, not Rust target triples
+        cargo ndk -t "$android_arch" --platform 21 build --release
     else
         # Build using cargo with explicit NDK paths
         cargo build --target "$rust_target" --release
@@ -76,6 +77,7 @@ for target_pair in "${TARGETS[@]}"; do
     mkdir -p "$OUTPUT_DIR/$android_arch"
     
     # Copy the library to the Flutter project
+    # Note: cargo-ndk places output in standard target directory with Rust target name
     cp "target/$rust_target/release/libnull_space_core.so" "$OUTPUT_DIR/$android_arch/"
     
     echo -e "${GREEN}✓ Built for $android_arch${NC}"

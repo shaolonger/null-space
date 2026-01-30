@@ -101,7 +101,9 @@ echo ""
 # Track build results
 BUILDS_SUCCESS=0
 BUILDS_FAILED=0
+BUILDS_SKIPPED=0
 FAILED_PLATFORMS=()
+SKIPPED_PLATFORMS=()
 
 # Build for Android
 if [ "$BUILD_ANDROID" = true ]; then
@@ -152,6 +154,8 @@ if [ "$BUILD_WINDOWS" = true ]; then
     else
         echo -e "${YELLOW}Warning: Windows builds must be run on Windows.${NC}"
         echo -e "${YELLOW}Skipping Windows build.${NC}"
+        ((BUILDS_SKIPPED++))
+        SKIPPED_PLATFORMS+=("Windows")
     fi
     echo ""
 fi
@@ -163,6 +167,15 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 echo -e "Successful builds: ${GREEN}$BUILDS_SUCCESS${NC}"
 echo -e "Failed builds:     ${RED}$BUILDS_FAILED${NC}"
+echo -e "Skipped builds:    ${YELLOW}$BUILDS_SKIPPED${NC}"
+
+if [ $BUILDS_SKIPPED -gt 0 ]; then
+    echo ""
+    echo -e "${YELLOW}Skipped platforms:${NC}"
+    for platform in "${SKIPPED_PLATFORMS[@]}"; do
+        echo -e "  ${YELLOW}⊘${NC} $platform"
+    done
+fi
 
 if [ $BUILDS_FAILED -gt 0 ]; then
     echo ""

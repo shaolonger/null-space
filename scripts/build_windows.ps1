@@ -40,6 +40,11 @@ Write-ColorOutput "Adding Windows target..." "Green"
 Write-Host "Adding target: $Target"
 rustup target add $Target
 
+if ($LASTEXITCODE -ne 0) {
+    Write-ColorOutput "Error: Failed to add Rust target." "Red"
+    exit 1
+}
+
 # Check if Visual Studio Build Tools are available
 $VSWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 if (Test-Path $VSWhere) {

@@ -60,6 +60,9 @@ cargo build --target x86_64-apple-ios --release
 
 # Create temporary directory for framework creation
 TEMP_DIR=$(mktemp -d)
+# Ensure cleanup on exit (success or failure)
+trap 'rm -rf "$TEMP_DIR"' EXIT
+
 echo -e "${GREEN}Creating XCFramework...${NC}"
 
 # Create device framework
@@ -140,9 +143,6 @@ xcodebuild -create-xcframework \
     -framework "$DEVICE_FRAMEWORK" \
     -framework "$SIMULATOR_FRAMEWORK" \
     -output "$XCFRAMEWORK_PATH"
-
-# Clean up temporary files
-rm -rf "$TEMP_DIR"
 
 echo -e "${GREEN}iOS XCFramework built successfully!${NC}"
 echo -e "XCFramework is located at: $XCFRAMEWORK_PATH"
