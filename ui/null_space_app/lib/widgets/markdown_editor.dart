@@ -76,14 +76,42 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
     super.initState();
     _currentMode = widget.initialMode;
     _internalFocusNode = widget.focusNode ?? FocusNode();
+    // Listen to controller changes to update preview
+    widget.controller.addListener(_onControllerChanged);
+  }
+  
+  @override
+  void didUpdateWidget(MarkdownEditor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update focus node if it changed
+    if (widget.focusNode != oldWidget.focusNode) {
+      if (oldWidget.focusNode == null) {
+        _internalFocusNode.dispose();
+      }
+      _internalFocusNode = widget.focusNode ?? FocusNode();
+    }
+    // Update controller listener if it changed
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller.removeListener(_onControllerChanged);
+      widget.controller.addListener(_onControllerChanged);
+    }
   }
   
   @override
   void dispose() {
+    widget.controller.removeListener(_onControllerChanged);
     if (widget.focusNode == null) {
       _internalFocusNode.dispose();
     }
     super.dispose();
+  }
+  
+  /// Handle controller text changes
+  void _onControllerChanged() {
+    // Rebuild to update preview
+    if (mounted) {
+      setState(() {});
+    }
   }
   
   /// Toggle between view modes
@@ -97,6 +125,11 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
   void _insertMarkdown(String before, String after, {String? placeholder}) {
     final text = widget.controller.text;
     final selection = widget.controller.selection;
+    
+    // Validate selection
+    if (!selection.isValid || selection.start < 0 || selection.end > text.length) {
+      return;
+    }
     
     String selectedText = '';
     if (selection.start != selection.end) {
@@ -127,6 +160,11 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
     final currentText = widget.controller.text;
     final selection = widget.controller.selection;
     
+    // Validate selection
+    if (!selection.isValid || selection.start < 0 || selection.end > currentText.length) {
+      return;
+    }
+    
     final newText = currentText.replaceRange(
       selection.start,
       selection.end,
@@ -147,6 +185,9 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
   /// Handle keyboard shortcuts
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    
+    // Don't handle shortcuts if editor is disabled
+    if (!widget.enabled) return KeyEventResult.ignored;
     
     final isControlPressed = HardwareKeyboard.instance.isControlPressed || 
                             HardwareKeyboard.instance.isMetaPressed;
@@ -347,14 +388,13 @@ class _MarkdownEditorState extends State<MarkdownEditor> {
   }
   
   Widget _buildEditor() {
-    return Focus(
-      focusNode: _internalFocusNode,
-      onKeyEvent: _handleKeyEvent,
-      child: Container(
-        padding: const EdgeInsets.all(16),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Focus(
+        focusNode: _internalFocusNode,
+        onKeyEvent: _handleKeyEvent,
         child: TextField(
           controller: widget.controller,
-          focusNode: _internalFocusNode,
           decoration: InputDecoration(
             hintText: widget.hintText ?? 'Write your note in Markdown...',
             border: InputBorder.none,
