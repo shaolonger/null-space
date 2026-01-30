@@ -11,10 +11,10 @@ class TagNode {
   TagNode({
     required this.name,
     required this.fullPath,
-    this.children = const [],
+    List<TagNode>? children,
     this.noteCount = 0,
     this.isSelected = false,
-  });
+  }) : children = children ?? [];
 }
 
 /// Tag filter widget with hierarchical tag display and multi-select filtering
@@ -23,6 +23,7 @@ class TagFilterWidget extends StatefulWidget {
   final List<String> selectedTags;
   final Function(List<String>) onTagsChanged;
   final Map<String, int>? tagCounts;
+  final ScrollController? scrollController;
 
   const TagFilterWidget({
     super.key,
@@ -30,6 +31,7 @@ class TagFilterWidget extends StatefulWidget {
     required this.selectedTags,
     required this.onTagsChanged,
     this.tagCounts,
+    this.scrollController,
   });
 
   @override
@@ -215,6 +217,7 @@ class _TagFilterWidgetState extends State<TagFilterWidget> {
         // Tag tree
         Expanded(
           child: ListView(
+            controller: widget.scrollController,
             padding: const EdgeInsets.symmetric(horizontal: 8),
             children: _tagTree.map((node) => _buildTagItem(node, 0)).toList(),
           ),

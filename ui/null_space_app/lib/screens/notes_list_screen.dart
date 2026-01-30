@@ -331,6 +331,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
               provider.setSelectedTags(tags);
             },
             tagCounts: provider.tagCounts,
+            scrollController: scrollController,
           ),
         ),
       ),
