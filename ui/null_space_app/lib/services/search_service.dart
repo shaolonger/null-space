@@ -91,11 +91,17 @@ class SearchResult {
 /// bridge.init();
 /// final service = SearchService(bridge: bridge);
 /// 
+/// final indexPath = 'vaults/my-vault/index';
+/// 
 /// // Initialize search index
-/// await service.initializeIndex(indexPath: 'vaults/my-vault/index');
+/// await service.initializeIndex(indexPath: indexPath);
 /// 
 /// // Search for notes
-/// final results = await service.search(query: 'important meeting', limit: 10);
+/// final results = await service.search(
+///   query: 'important meeting',
+///   indexPath: indexPath,
+///   limit: 10,
+/// );
 /// for (final result in results) {
 ///   print('Found note ${result.noteId} with score ${result.score}');
 /// }
@@ -107,26 +113,29 @@ class SearchService {
 
   /// Initialize the search index
   /// 
-  /// Creates or opens a search index at the specified path. This must be
-  /// called before performing any search operations.
+  /// Validates the index path and prepares it for use in search operations.
+  /// The actual index initialization in Tantivy happens automatically when
+  /// the first search or index operation is performed on the Rust side.
+  /// 
+  /// This method is optional but recommended to call early to validate the
+  /// index path configuration and catch any path-related errors before
+  /// attempting search operations.
   /// 
   /// [indexPath] - The file system path where the index is stored
   /// 
-  /// Throws [SearchServiceException] if initialization fails.
+  /// Throws [SearchServiceException] if the index path is invalid.
   Future<void> initializeIndex({required String indexPath}) async {
     try {
-      // The Rust search implementation handles index initialization internally
-      // when the search function is called. This method ensures the index path
-      // is valid and can be used for future search operations.
-      
       // Validate the index path is not empty
       if (indexPath.isEmpty) {
         throw SearchServiceException('Index path cannot be empty');
       }
       
-      // Note: The actual index initialization happens in the Rust side when
-      // the first search or index operation is performed.
-      debugPrint('Search index initialized at: $indexPath');
+      // Note: The actual index initialization happens lazily in the Rust side
+      // when the first search or index operation is performed. This method
+      // exists primarily for early validation and to maintain consistency
+      // with the development plan's API design.
+      debugPrint('Search index path validated: $indexPath');
     } catch (e) {
       if (e is SearchServiceException) {
         rethrow;
