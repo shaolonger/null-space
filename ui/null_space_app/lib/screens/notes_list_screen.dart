@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/note.dart';
 import '../providers/note_provider.dart';
 import '../widgets/note_card.dart';
+import '../widgets/tag_filter_widget.dart';
 import 'note_editor_screen.dart';
 
 /// Notes list screen with sorting, filtering, and management
@@ -110,74 +111,96 @@ class _NotesListScreenState extends State<NotesListScreen> {
               );
             },
           ),
-          PopupMenuButton<SortOption>(
-            icon: const Icon(Icons.sort),
-            tooltip: 'Sort notes',
-            onSelected: (option) {
-              setState(() {
-                _sortOption = option;
-              });
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: SortOption.updatedDesc,
-                child: Row(
-                  children: [
-                    Icon(
-                      _sortOption == SortOption.updatedDesc
-                          ? Icons.check
-                          : Icons.check_box_outline_blank,
-                      size: 20,
+          Row(
+            children: [
+              // Tag filter button
+              Consumer<NoteProvider>(
+                builder: (context, noteProvider, child) {
+                  final hasFilters = noteProvider.selectedTags.isNotEmpty;
+                  return IconButton(
+                    icon: Badge(
+                      isLabelVisible: hasFilters,
+                      label: Text('${noteProvider.selectedTags.length}'),
+                      child: Icon(
+                        hasFilters ? Icons.filter_alt : Icons.filter_alt_outlined,
+                      ),
                     ),
-                    const SizedBox(width: 8),
-                    const Text('Recently Updated'),
-                  ],
-                ),
+                    tooltip: 'Filter by tags',
+                    onPressed: () => _showTagFilter(context),
+                  );
+                },
               ),
-              PopupMenuItem(
-                value: SortOption.createdDesc,
-                child: Row(
-                  children: [
-                    Icon(
-                      _sortOption == SortOption.createdDesc
-                          ? Icons.check
-                          : Icons.check_box_outline_blank,
-                      size: 20,
+              // Sort button
+              PopupMenuButton<SortOption>(
+                icon: const Icon(Icons.sort),
+                tooltip: 'Sort notes',
+                onSelected: (option) {
+                  setState(() {
+                    _sortOption = option;
+                  });
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: SortOption.updatedDesc,
+                    child: Row(
+                      children: [
+                        Icon(
+                          _sortOption == SortOption.updatedDesc
+                              ? Icons.check
+                              : Icons.check_box_outline_blank,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Recently Updated'),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    const Text('Recently Created'),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: SortOption.titleAsc,
-                child: Row(
-                  children: [
-                    Icon(
-                      _sortOption == SortOption.titleAsc
-                          ? Icons.check
-                          : Icons.check_box_outline_blank,
-                      size: 20,
+                  ),
+                  PopupMenuItem(
+                    value: SortOption.createdDesc,
+                    child: Row(
+                      children: [
+                        Icon(
+                          _sortOption == SortOption.createdDesc
+                              ? Icons.check
+                              : Icons.check_box_outline_blank,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Recently Created'),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    const Text('Title A-Z'),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: SortOption.titleDesc,
-                child: Row(
-                  children: [
-                    Icon(
-                      _sortOption == SortOption.titleDesc
-                          ? Icons.check
-                          : Icons.check_box_outline_blank,
-                      size: 20,
+                  ),
+                  PopupMenuItem(
+                    value: SortOption.titleAsc,
+                    child: Row(
+                      children: [
+                        Icon(
+                          _sortOption == SortOption.titleAsc
+                              ? Icons.check
+                              : Icons.check_box_outline_blank,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Title A-Z'),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    const Text('Title Z-A'),
-                  ],
-                ),
+                  ),
+                  PopupMenuItem(
+                    value: SortOption.titleDesc,
+                    child: Row(
+                      children: [
+                        Icon(
+                          _sortOption == SortOption.titleDesc
+                              ? Icons.check
+                              : Icons.check_box_outline_blank,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Title Z-A'),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -285,6 +308,32 @@ class _NotesListScreenState extends State<NotesListScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showTagFilter(BuildContext context) {
+    final noteProvider = Provider.of<NoteProvider>(context, listen: false);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.3,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (context, scrollController) => Consumer<NoteProvider>(
+          builder: (context, provider, child) => TagFilterWidget(
+            allTags: provider.allTags,
+            selectedTags: provider.selectedTags,
+            onTagsChanged: (tags) {
+              provider.setSelectedTags(tags);
+            },
+            tagCounts: provider.tagCounts,
+            scrollController: scrollController,
+          ),
+        ),
       ),
     );
   }
