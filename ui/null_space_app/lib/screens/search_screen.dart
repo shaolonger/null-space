@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../providers/search_provider.dart';
 import '../providers/note_provider.dart';
 import '../models/note.dart';
@@ -87,6 +88,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final searchProvider = context.watch<SearchProvider>();
     final noteProvider = context.watch<NoteProvider>();
     final colorScheme = Theme.of(context).colorScheme;
@@ -100,13 +102,13 @@ class _SearchScreenState extends State<SearchScreen> {
             controller: _searchController,
             onChanged: _onSearchChanged,
             decoration: InputDecoration(
-              hintText: 'Search notes...',
+              hintText: l10n.searchNotes,
               prefixIcon: const Icon(Icons.search),
               suffixIcon: searchProvider.hasQuery
                   ? IconButton(
                       icon: const Icon(Icons.clear),
                       onPressed: _onClearSearch,
-                      tooltip: 'Clear search',
+                      tooltip: l10n.clearSearch,
                     )
                   : null,
               border: OutlineInputBorder(
@@ -139,6 +141,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     // Show error message if present
     if (searchProvider.errorMessage != null) {
+      final l10n = AppLocalizations.of(context)!;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -150,7 +153,7 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Search Error',
+              l10n.error,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
@@ -194,6 +197,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildEmptyResults() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -205,12 +209,12 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            'No Results Found',
+            l10n.noResultsFound,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
           Text(
-            'Try different keywords or check your spelling',
+            l10n.tryDifferentKeywords,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -222,6 +226,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildSearchHistory(SearchProvider searchProvider) {
+    final l10n = AppLocalizations.of(context)!;
     if (searchProvider.searchHistory.isEmpty) {
       return Center(
         child: Column(
@@ -234,12 +239,12 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Search Your Notes',
+              l10n.searchYourNotes,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
             Text(
-              'Enter keywords to find notes',
+              l10n.enterKeywords,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -262,7 +267,7 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
             TextButton(
               onPressed: searchProvider.clearHistory,
-              child: const Text('Clear All'),
+              child: Text(l10n.clear),
             ),
           ],
         ),
@@ -278,7 +283,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 trailing: IconButton(
                   icon: const Icon(Icons.close),
                   onPressed: () => searchProvider.removeFromHistory(query),
-                  tooltip: 'Remove from history',
+                  tooltip: l10n.clear,
                 ),
                 onTap: () => _onSearchHistoryTap(query),
               );
@@ -302,6 +307,7 @@ class _SearchResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
     
     return Card(
@@ -318,7 +324,7 @@ class _SearchResultCard extends StatelessWidget {
               _buildHighlightedText(
                 result.titleSnippet.isNotEmpty
                     ? result.titleSnippet
-                    : 'Untitled',
+                    : l10n.untitledNote,
                 context.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),

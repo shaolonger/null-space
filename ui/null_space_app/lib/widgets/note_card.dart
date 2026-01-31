@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/note.dart';
 import '../utils/date_formatter.dart';
 
@@ -19,6 +20,7 @@ class NoteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -42,7 +44,7 @@ class NoteCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      note.title.isEmpty ? 'Untitled Note' : note.title,
+                      note.title.isEmpty ? l10n.untitledNote : note.title,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -53,7 +55,7 @@ class NoteCard extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.delete_outline, size: 20),
                     onPressed: onDelete,
-                    tooltip: 'Delete note',
+                    tooltip: l10n.deleteNoteTooltip,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                   ),
@@ -85,7 +87,7 @@ class NoteCard extends StatelessWidget {
                 ),
               // Last updated date
               Text(
-                'Updated ${_formatDate(note.updatedAt)}',
+                '${l10n.updated} ${_formatDate(note.updatedAt)}',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
                 ),

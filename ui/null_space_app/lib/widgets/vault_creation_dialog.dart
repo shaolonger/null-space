@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/vault.dart';
 import '../services/vault_service.dart';
 import '../providers/vault_provider.dart';
@@ -64,18 +65,18 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
   }
 
   /// Get password strength label
-  String _getPasswordStrengthLabel(int strength) {
+  String _getPasswordStrengthLabel(int strength, AppLocalizations l10n) {
     switch (strength) {
       case 0:
-        return 'Weak';
+        return l10n.passwordStrengthWeak;
       case 1:
-        return 'Medium';
+        return l10n.passwordStrengthMedium;
       case 2:
-        return 'Strong';
+        return l10n.passwordStrengthStrong;
       case 3:
-        return 'Very Strong';
+        return l10n.passwordStrengthVeryStrong;
       default:
-        return 'Weak';
+        return l10n.passwordStrengthWeak;
     }
   }
 
@@ -96,10 +97,10 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
   }
 
   /// Validate vault name
-  String? _validateName(String? value) {
+  String? _validateName(String? value, AppLocalizations l10n) {
     final trimmedValue = value?.trim() ?? '';
     if (trimmedValue.isEmpty) {
-      return 'Vault name is required';
+      return l10n.vaultNameRequired;
     }
     if (trimmedValue.length > 100) {
       return 'Name must be 100 characters or less';
@@ -111,23 +112,23 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
   /// 
   /// Note: Password is intentionally NOT trimmed to allow users to include
   /// leading or trailing whitespace in their passwords if desired.
-  String? _validatePassword(String? value) {
+  String? _validatePassword(String? value, AppLocalizations l10n) {
     if (value == null || value.isEmpty) {
-      return 'Password is required';
+      return l10n.passwordRequired;
     }
     if (value.length < 8) {
-      return 'Password must be at least 8 characters';
+      return l10n.passwordMinLength;
     }
     return null;
   }
 
   /// Validate confirm password
-  String? _validateConfirmPassword(String? value) {
+  String? _validateConfirmPassword(String? value, AppLocalizations l10n) {
     if (value == null || value.isEmpty) {
       return 'Please confirm your password';
     }
     if (value != _passwordController.text) {
-      return 'Passwords do not match';
+      return l10n.passwordsDoNotMatch;
     }
     return null;
   }
@@ -178,10 +179,11 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return AlertDialog(
-      title: const Text('Create New Vault'),
+      title: Text(l10n.createNewVault),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -192,14 +194,14 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
               // Vault name field
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Vault Name',
+                decoration: InputDecoration(
+                  labelText: l10n.vaultName,
                   hintText: 'Enter vault name',
-                  prefixIcon: Icon(Icons.folder),
-                  border: OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.folder),
+                  border: const OutlineInputBorder(),
                 ),
                 textInputAction: TextInputAction.next,
-                validator: _validateName,
+                validator: (value) => _validateName(value, l10n),
                 enabled: !_isLoading,
               ),
               const SizedBox(height: 16),
@@ -207,11 +209,11 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
               // Description field
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description (Optional)',
+                decoration: InputDecoration(
+                  labelText: '${l10n.description} (Optional)',
                   hintText: 'Enter vault description',
-                  prefixIcon: Icon(Icons.description),
-                  border: OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.description),
+                  border: const OutlineInputBorder(),
                 ),
                 textInputAction: TextInputAction.next,
                 maxLines: 2,
@@ -223,7 +225,7 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
               TextFormField(
                 controller: _passwordController,
                 decoration: InputDecoration(
-                  labelText: 'Password',
+                  labelText: l10n.password,
                   hintText: 'Enter password (min 8 characters)',
                   prefixIcon: const Icon(Icons.lock),
                   suffixIcon: IconButton(
@@ -238,7 +240,7 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
                 ),
                 obscureText: _obscurePassword,
                 textInputAction: TextInputAction.next,
-                validator: _validatePassword,
+                validator: (value) => _validatePassword(value, l10n),
                 enabled: !_isLoading,
                 onChanged: (value) {
                   // Update password strength
@@ -263,7 +265,7 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      _getPasswordStrengthLabel(_passwordStrength),
+                      _getPasswordStrengthLabel(_passwordStrength, l10n),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: _getPasswordStrengthColor(_passwordStrength),
                         fontWeight: FontWeight.bold,
@@ -279,7 +281,7 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
               TextFormField(
                 controller: _confirmPasswordController,
                 decoration: InputDecoration(
-                  labelText: 'Confirm Password',
+                  labelText: l10n.confirmPassword,
                   hintText: 'Re-enter password',
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
@@ -294,7 +296,7 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
                 ),
                 obscureText: _obscureConfirmPassword,
                 textInputAction: TextInputAction.done,
-                validator: _validateConfirmPassword,
+                validator: (value) => _validateConfirmPassword(value, l10n),
                 enabled: !_isLoading,
                 onFieldSubmitted: (_) => _createVault(),
               ),
@@ -336,7 +338,7 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
         // Cancel button
         TextButton(
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
 
         // Create button
@@ -351,7 +353,7 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
                 )
-              : const Text('Create'),
+              : Text(l10n.create),
         ),
       ],
     );

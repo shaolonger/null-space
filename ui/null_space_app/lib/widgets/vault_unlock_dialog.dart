@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/vault.dart';
 import '../services/vault_service.dart';
 import '../services/auth_service.dart';
@@ -88,9 +89,9 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
   /// 
   /// Note: Password is intentionally NOT trimmed to allow users to include
   /// leading or trailing whitespace in their passwords if desired.
-  String? _validatePassword(String? value) {
+  String? _validatePassword(String? value, AppLocalizations l10n) {
     if (value == null || value.isEmpty) {
-      return 'Password is required';
+      return l10n.passwordRequired;
     }
     return null;
   }
@@ -150,6 +151,8 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
 
   /// Unlock vault
   Future<void> _unlockVault() async {
+    final l10n = AppLocalizations.of(context)!;
+    
     // Clear previous error
     setState(() {
       _errorMessage = null;
@@ -175,7 +178,7 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
       // Increment failed attempts
       setState(() {
         _failedAttempts++;
-        _errorMessage = 'Incorrect password. Please try again.';
+        _errorMessage = l10n.incorrectPassword;
         _isLoading = false;
       });
       return;
@@ -202,10 +205,11 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
     return AlertDialog(
-      title: const Text('Unlock Vault'),
+      title: Text(l10n.unlockVault),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -263,7 +267,7 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
               TextFormField(
                 controller: _passwordController,
                 decoration: InputDecoration(
-                  labelText: 'Password',
+                  labelText: l10n.password,
                   hintText: 'Enter vault password',
                   prefixIcon: const Icon(Icons.lock),
                   suffixIcon: IconButton(
@@ -278,7 +282,7 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
                 ),
                 obscureText: _obscurePassword,
                 textInputAction: TextInputAction.done,
-                validator: _validatePassword,
+                validator: (value) => _validatePassword(value, l10n),
                 enabled: !_isLoading,
                 onFieldSubmitted: (_) => _unlockVault(),
                 autofocus: !_biometricsAvailable,
@@ -290,7 +294,7 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
                 OutlinedButton.icon(
                   onPressed: _isLoading ? null : _authenticateWithBiometrics,
                   icon: const Icon(Icons.fingerprint),
-                  label: const Text('Unlock with Biometrics'),
+                  label: Text(l10n.unlockWithBiometrics),
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size.fromHeight(48),
                   ),
@@ -367,7 +371,7 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
         // Cancel button
         TextButton(
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
 
         // Unlock button
@@ -382,7 +386,7 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
                 )
-              : const Text('Unlock'),
+              : Text(l10n.unlock),
         ),
       ],
     );
