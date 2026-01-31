@@ -119,7 +119,7 @@ void main() {
 
       // Set text and select part of it
       controller.text = 'Hello World';
-      controller.selection = const TextSelection(start: 0, end: 5);
+      controller.selection = const TextSelection(baseOffset: 0, extentOffset: 5);
       await tester.pump();
 
       // Tap bold button
@@ -146,7 +146,7 @@ void main() {
 
       // Set text and select part of it
       controller.text = 'Hello World';
-      controller.selection = const TextSelection(start: 6, end: 11);
+      controller.selection = const TextSelection(baseOffset: 6, extentOffset: 11);
       await tester.pump();
 
       // Tap italic button
@@ -226,7 +226,7 @@ void main() {
 
       // Set text and select part of it
       controller.text = 'Click here';
-      controller.selection = const TextSelection(start: 0, end: 10);
+      controller.selection = const TextSelection(baseOffset: 0, extentOffset: 10);
       await tester.pump();
 
       // Tap link button

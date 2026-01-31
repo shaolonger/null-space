@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -221,7 +220,7 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest,
+                  color: theme.colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(

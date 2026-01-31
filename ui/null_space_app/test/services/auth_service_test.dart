@@ -19,7 +19,7 @@ class MockLocalAuthentication extends LocalAuthentication {
   bool throwOnCanCheckBiometrics = false;
 
   @override
-  Future<bool> canCheckBiometrics() async {
+  Future<bool> get canCheckBiometrics async {
     if (throwOnCanCheckBiometrics) {
       throw Exception('Test exception in canCheckBiometrics');
     }

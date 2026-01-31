@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:null_space_app/models/vault.dart';
+import 'package:null_space_app/models/note.dart';
 import 'package:null_space_app/services/vault_service.dart';
 import 'package:null_space_app/services/file_storage.dart';
 import 'package:null_space_app/bridge/rust_bridge.dart';
+import 'package:provider/provider.dart';
+import 'package:null_space_app/providers/settings_provider.dart';
 import 'package:null_space_app/widgets/vault_unlock_dialog.dart';
 
 // Mock classes
@@ -36,14 +39,55 @@ class MockRustBridge extends RustBridge {
     }
     return ciphertext.replaceFirst('encrypted_', '');
   }
+
+  @override
+  Note createNote(String title, String content, List<String> tags) {
+    return Note(
+      id: 'mock-note',
+      title: title,
+      content: content,
+      tags: tags,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      version: 1,
+    );
+  }
+
+  @override
+  Note updateNote(Note note) => note;
+
+  @override
+  List<Map<String, dynamic>> search(String indexPath, String query, int limit) {
+    return [];
+  }
+
+  @override
+  bool exportVault(
+      Vault vault, List<Note> notes, String outputPath, String password) {
+    return true;
+  }
+
+  @override
+  Map<String, dynamic> importVault(String inputPath, String password) {
+    return {
+      'vault': Vault(
+        id: 'mock-vault',
+        name: 'Mock Vault',
+        description: '',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        salt: 'mock-salt',
+      ),
+      'notes': <Note>[],
+    };
+  }
 }
 
 class MockFileStorage extends FileStorage {
   final Map<String, List<int>> _files = {};
   final Set<String> _directories = {};
 
-  @override
-  Future<void> init() async {}
+  MockFileStorage() : super.withBasePath('/tmp/mock');
 
   @override
   Future<void> writeFile(String path, List<int> data) async {
@@ -56,11 +100,6 @@ class MockFileStorage extends FileStorage {
   }
 
   @override
-  Future<bool> exists(String path) async {
-    return _files.containsKey(path);
-  }
-
-  @override
   Future<void> createDirectory(String path) async {
     _directories.add(path);
   }
@@ -69,6 +108,11 @@ class MockFileStorage extends FileStorage {
   Future<void> deleteDirectory(String path) async {
     _directories.remove(path);
     _files.removeWhere((key, value) => key.startsWith('$path/'));
+  }
+
+  @override
+  Future<bool> exists(String path) async {
+    return _files.containsKey(path) || _directories.contains(path);
   }
 }
 
@@ -94,20 +138,25 @@ void main() {
     });
 
     Widget createDialog() {
-      return MaterialApp(
-        home: Scaffold(
-          body: Builder(
-            builder: (context) => ElevatedButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => VaultUnlockDialog(
-                    vault: testVault,
-                    vaultService: vaultService,
-                  ),
-                );
-              },
-              child: const Text('Show Dialog'),
+      return MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => SettingsProvider()),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => VaultUnlockDialog(
+                      vault: testVault,
+                      vaultService: vaultService,
+                    ),
+                  );
+                },
+                child: const Text('Show Dialog'),
+              ),
             ),
           ),
         ),
@@ -138,20 +187,25 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) => ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => VaultUnlockDialog(
-                      vault: vaultWithoutDescription,
-                      vaultService: vaultService,
-                    ),
-                  );
-                },
-                child: const Text('Show Dialog'),
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => SettingsProvider()),
+          ],
+          child: MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => ElevatedButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => VaultUnlockDialog(
+                        vault: vaultWithoutDescription,
+                        vaultService: vaultService,
+                      ),
+                    );
+                  },
+                  child: const Text('Show Dialog'),
+                ),
               ),
             ),
           ),
@@ -429,20 +483,25 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) => ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => VaultUnlockDialog(
-                      vault: vaultWithLongName,
-                      vaultService: vaultService,
-                    ),
-                  );
-                },
-                child: const Text('Show Dialog'),
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => SettingsProvider()),
+          ],
+          child: MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => ElevatedButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => VaultUnlockDialog(
+                        vault: vaultWithLongName,
+                        vaultService: vaultService,
+                      ),
+                    );
+                  },
+                  child: const Text('Show Dialog'),
+                ),
               ),
             ),
           ),
@@ -469,20 +528,25 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Builder(
-              builder: (context) => ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => VaultUnlockDialog(
-                      vault: vaultWithLongDescription,
-                      vaultService: vaultService,
-                    ),
-                  );
-                },
-                child: const Text('Show Dialog'),
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => SettingsProvider()),
+          ],
+          child: MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => ElevatedButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => VaultUnlockDialog(
+                        vault: vaultWithLongDescription,
+                        vaultService: vaultService,
+                      ),
+                    );
+                  },
+                  child: const Text('Show Dialog'),
+                ),
               ),
             ),
           ),

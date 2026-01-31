@@ -74,16 +74,16 @@ class _SearchScreenState extends State<SearchScreen> {
     // In production, vault credentials must be obtained from VaultProvider
     // Example: final vault = context.read<VaultProvider>().activeVault;
     // assert(vault != null, 'No active vault for opening note');
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => NoteEditorScreen(
-          vaultPath: '/tmp/default-vault',
-          vaultPassword: 'development',
-          vaultSalt: 'development-salt',
-          noteId: note.id,
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => NoteEditorScreen(
+            note: note,
+            vaultPath: '/tmp/default-vault',
+            vaultPassword: 'development',
+            vaultSalt: 'development-salt',
+          ),
         ),
-      ),
-    );
+      );
   }
 
   @override

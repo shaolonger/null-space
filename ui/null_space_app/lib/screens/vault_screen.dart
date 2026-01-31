@@ -231,7 +231,7 @@ class _VaultScreenState extends State<VaultScreen> {
       }
 
       // TODO: Load notes from vault
-      final notes = []; // Placeholder - would need NoteService integration
+      final notes = <Note>[]; // Placeholder - would need NoteService integration
       
       await _vaultService!.exportVault(
         vault: vault,

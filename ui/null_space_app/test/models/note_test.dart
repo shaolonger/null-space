@@ -237,7 +237,7 @@ void main() {
     });
 
     test('handles very long content', () {
-      final longContent = 'A' * 10000; // 10,000 characters
+      final longContent = List.filled(10000, 'A').join(); // 10,000 characters
       final note = Note(
         id: 'note-long-content',
         title: 'Title',

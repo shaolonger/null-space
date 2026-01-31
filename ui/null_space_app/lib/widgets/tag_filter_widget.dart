@@ -286,7 +286,7 @@ class _TagFilterWidgetState extends State<TagFilterWidget> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? theme.colorScheme.primary
-                          : theme.colorScheme.surfaceContainerHighest,
+                          : theme.colorScheme.surfaceVariant,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:null_space_app/models/vault.dart';
+import 'package:null_space_app/models/note.dart';
 import 'package:null_space_app/services/vault_service.dart';
 import 'package:null_space_app/services/file_storage.dart';
 import 'package:null_space_app/bridge/rust_bridge.dart';
@@ -36,6 +37,48 @@ class MockRustBridge extends RustBridge {
   String decrypt(String ciphertext, String password, String salt) {
     return ciphertext.replaceFirst('encrypted_', '');
   }
+
+  @override
+  Note createNote(String title, String content, List<String> tags) {
+    return Note(
+      id: 'mock-note',
+      title: title,
+      content: content,
+      tags: tags,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      version: 1,
+    );
+  }
+
+  @override
+  Note updateNote(Note note) => note;
+
+  @override
+  List<Map<String, dynamic>> search(String indexPath, String query, int limit) {
+    return [];
+  }
+
+  @override
+  bool exportVault(
+      Vault vault, List<Note> notes, String outputPath, String password) {
+    return true;
+  }
+
+  @override
+  Map<String, dynamic> importVault(String inputPath, String password) {
+    return {
+      'vault': Vault(
+        id: 'mock-vault',
+        name: 'Mock Vault',
+        description: '',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        salt: 'mock-salt',
+      ),
+      'notes': <Note>[],
+    };
+  }
 }
 
 class MockFileStorage extends FileStorage {
@@ -43,8 +86,7 @@ class MockFileStorage extends FileStorage {
   final Set<String> _directories = {};
   bool shouldFailWrite = false;
 
-  @override
-  Future<void> init() async {}
+  MockFileStorage() : super.withBasePath('/tmp/mock');
 
   @override
   Future<void> writeFile(String path, List<int> data) async {
@@ -60,11 +102,6 @@ class MockFileStorage extends FileStorage {
   }
 
   @override
-  Future<bool> exists(String path) async {
-    return _files.containsKey(path);
-  }
-
-  @override
   Future<void> createDirectory(String path) async {
     _directories.add(path);
   }
@@ -73,6 +110,11 @@ class MockFileStorage extends FileStorage {
   Future<void> deleteDirectory(String path) async {
     _directories.remove(path);
     _files.removeWhere((key, value) => key.startsWith('$path/'));
+  }
+
+  @override
+  Future<bool> exists(String path) async {
+    return _files.containsKey(path) || _directories.contains(path);
   }
 }
 
