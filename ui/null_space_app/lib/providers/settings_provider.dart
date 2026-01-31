@@ -10,6 +10,12 @@ enum EditorViewMode {
 }
 
 /// Provider for managing app settings
+///
+/// All setter methods persist changes to SharedPreferences before updating
+/// the in-memory state and notifying listeners. This ensures atomicity -
+/// if persistence fails, the state remains unchanged and listeners are not
+/// notified. This prevents UI/state inconsistencies where the UI shows a
+/// setting as changed but the change isn't actually saved to disk.
 class SettingsProvider extends ChangeNotifier {
   // Private fields
   ThemeMode _themeMode = ThemeMode.system;
@@ -93,93 +99,113 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   /// Set theme mode
+  ///
+  /// Throws an exception if persistence fails.
   Future<void> setThemeMode(ThemeMode mode) async {
-    _themeMode = mode;
-    notifyListeners();
-    
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_themeModeKey, mode.index);
+    
+    _themeMode = mode;
+    notifyListeners();
   }
 
   /// Set font size
+  ///
+  /// Throws an exception if persistence fails.
   Future<void> setFontSize(double size) async {
-    _fontSize = size;
-    notifyListeners();
-    
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_fontSizeKey, size);
+    
+    _fontSize = size;
+    notifyListeners();
   }
 
   /// Set line spacing
+  ///
+  /// Throws an exception if persistence fails.
   Future<void> setLineSpacing(double spacing) async {
-    _lineSpacing = spacing;
-    notifyListeners();
-    
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_lineSpacingKey, spacing);
+    
+    _lineSpacing = spacing;
+    notifyListeners();
   }
 
   /// Set auto-lock timeout
+  ///
+  /// Throws an exception if persistence fails.
   Future<void> setAutoLockTimeout(Duration duration) async {
-    _autoLockTimeout = duration;
-    notifyListeners();
-    
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_autoLockTimeoutKey, duration.inMinutes);
+    
+    _autoLockTimeout = duration;
+    notifyListeners();
   }
 
   /// Set biometric enabled
+  ///
+  /// Throws an exception if persistence fails.
   Future<void> setBiometricEnabled(bool enabled) async {
-    _biometricEnabled = enabled;
-    notifyListeners();
-    
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_biometricEnabledKey, enabled);
+    
+    _biometricEnabled = enabled;
+    notifyListeners();
   }
 
   /// Set clear clipboard
+  ///
+  /// Throws an exception if persistence fails.
   Future<void> setClearClipboard(bool enabled) async {
-    _clearClipboard = enabled;
-    notifyListeners();
-    
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_clearClipboardKey, enabled);
+    
+    _clearClipboard = enabled;
+    notifyListeners();
   }
 
   /// Set editor view mode
+  ///
+  /// Throws an exception if persistence fails.
   Future<void> setEditorViewMode(EditorViewMode mode) async {
-    _editorViewMode = mode;
-    notifyListeners();
-    
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_editorViewModeKey, mode.index);
+    
+    _editorViewMode = mode;
+    notifyListeners();
   }
 
   /// Set auto-save interval
+  ///
+  /// Throws an exception if persistence fails.
   Future<void> setAutoSaveInterval(Duration interval) async {
-    _autoSaveInterval = interval;
-    notifyListeners();
-    
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_autoSaveIntervalKey, interval.inSeconds);
+    
+    _autoSaveInterval = interval;
+    notifyListeners();
   }
 
   /// Set spell check enabled
+  ///
+  /// Throws an exception if persistence fails.
   Future<void> setSpellCheckEnabled(bool enabled) async {
-    _spellCheckEnabled = enabled;
-    notifyListeners();
-    
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_spellCheckEnabledKey, enabled);
+    
+    _spellCheckEnabled = enabled;
+    notifyListeners();
   }
 
   /// Set data directory
+  ///
+  /// Throws an exception if persistence fails.
   Future<void> setDataDirectory(String directory) async {
-    _dataDirectory = directory;
-    notifyListeners();
-    
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_dataDirectoryKey, directory);
+    
+    _dataDirectory = directory;
+    notifyListeners();
   }
 
   /// Reset all settings to defaults
