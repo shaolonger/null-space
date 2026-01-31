@@ -140,9 +140,13 @@ void main() {
     testWidgets('does not show already selected tags in suggestions', 
         (WidgetTester tester) async {
       final availableTags = ['work', 'urgent', 'personal'];
+      List<String> tags = [];
       await tester.pumpWidget(createWidget(
         availableTags: availableTags,
         initialTags: ['work'],
+        onTagsChanged: (newTags) {
+          tags = newTags;
+        },
       ));
 
       // Enter text
@@ -150,6 +154,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Widget should build successfully
+      expect(tags, isEmpty);
       expect(find.byType(TextField), findsOneWidget);
     });
 

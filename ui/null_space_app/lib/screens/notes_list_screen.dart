@@ -317,7 +317,6 @@ class _NotesListScreenState extends State<NotesListScreen> {
   }
 
   void _showTagFilter(BuildContext context) {
-    final noteProvider = context.read<NoteProvider>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

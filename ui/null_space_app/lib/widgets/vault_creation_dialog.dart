@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../models/vault.dart';
+import 'package:provider/provider.dart';
+import '../providers/vault_provider.dart';
 import '../services/vault_service.dart';
 
 /// Dialog for creating a new vault

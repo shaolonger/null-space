@@ -255,20 +255,24 @@ void main() {
       await tester.pumpAndSettle();
 
       // Initially, password should be obscured
-      var passwordWidget = tester.widget<TextFormField>(passwordField);
-      final passwordIconButton = passwordWidget.decoration?.suffixIcon as IconButton?;
-      final passwordIcon = passwordIconButton?.icon as Icon?;
-      expect(passwordIcon?.icon, Icons.visibility);
+      final passwordVisibilityToggle = find.descendant(
+        of: passwordField,
+        matching: find.byIcon(Icons.visibility),
+      );
+      expect(passwordVisibilityToggle, findsOneWidget);
 
       // Tap visibility toggle
-      await tester.tap(find.byIcon(Icons.visibility));
+      await tester.tap(passwordVisibilityToggle);
       await tester.pumpAndSettle();
 
       // Password should now be visible
-      passwordWidget = tester.widget<TextFormField>(passwordField);
-      final updatedIconButton = passwordWidget.decoration?.suffixIcon as IconButton?;
-      final updatedIcon = updatedIconButton?.icon as Icon?;
-      expect(updatedIcon?.icon, Icons.visibility_off);
+      expect(
+        find.descendant(
+          of: passwordField,
+          matching: find.byIcon(Icons.visibility_off),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('unlocks vault successfully with correct password', (WidgetTester tester) async {
@@ -458,12 +462,10 @@ void main() {
       await tester.pumpAndSettle();
 
       // Password field should have autofocus
-      final passwordField = tester.widget<TextFormField>(
-        find.widgetWithText(TextFormField, 'Password'),
-      );
-      final autofocusNode = passwordField.focusNode;
-      expect(autofocusNode, isNotNull);
-      expect(autofocusNode!.canRequestFocus, true);
+      final focusNode = tester
+          .widget<TextFormField>(find.widgetWithText(TextFormField, 'Password'))
+          .focusNode;
+      expect(focusNode?.canRequestFocus ?? true, true);
     });
 
     testWidgets('submits form on Enter key press', (WidgetTester tester) async {

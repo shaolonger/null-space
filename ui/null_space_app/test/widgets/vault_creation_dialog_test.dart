@@ -276,20 +276,24 @@ void main() {
       await tester.pumpAndSettle();
 
       // Initially, password should be obscured
-      var passwordWidget = tester.widget<TextFormField>(passwordField);
-      final passwordIconButton = passwordWidget.decoration?.suffixIcon as IconButton?;
-      final passwordIcon = passwordIconButton?.icon as Icon?;
-      expect(passwordIcon?.icon, Icons.visibility);
+      final passwordVisibilityToggle = find.descendant(
+        of: passwordField,
+        matching: find.byIcon(Icons.visibility),
+      );
+      expect(passwordVisibilityToggle, findsOneWidget);
 
       // Tap visibility toggle
-      await tester.tap(find.byIcon(Icons.visibility).first);
+      await tester.tap(passwordVisibilityToggle);
       await tester.pumpAndSettle();
 
       // Password should now be visible
-      passwordWidget = tester.widget<TextFormField>(passwordField);
-      final updatedIconButton = passwordWidget.decoration?.suffixIcon as IconButton?;
-      final updatedIcon = updatedIconButton?.icon as Icon?;
-      expect(updatedIcon?.icon, Icons.visibility_off);
+      expect(
+        find.descendant(
+          of: passwordField,
+          matching: find.byIcon(Icons.visibility_off),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows password strength indicator', (WidgetTester tester) async {

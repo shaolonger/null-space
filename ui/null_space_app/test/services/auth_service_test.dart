@@ -42,8 +42,12 @@ class MockLocalAuthentication extends LocalAuthentication {
   @override
   Future<bool> authenticate({
     required String localizedReason,
-    required AuthenticationOptions options,
-    List<AuthMessages>? authMessages,
+    Iterable<AuthMessages> authMessages = const <AuthMessages>[
+      IOSAuthMessages(),
+      AndroidAuthMessages(),
+      WindowsAuthMessages(),
+    ],
+    AuthenticationOptions options = const AuthenticationOptions(),
   }) async {
     if (mockAuthenticateException != null) {
       throw mockAuthenticateException!;
