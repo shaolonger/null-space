@@ -1,8 +1,8 @@
 //! Data models for notes, tags, and vaults
 
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::{DateTime, Utc};
 
 /// A note in the system
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -81,11 +81,11 @@ impl Tag {
     pub fn ancestors(&self) -> Vec<String> {
         let mut ancestors = Vec::new();
         let parts: Vec<&str> = self.path.split('/').collect();
-        
+
         for i in 1..parts.len() {
             ancestors.push(parts[..i].join("/"));
         }
-        
+
         ancestors
     }
 }
@@ -159,15 +159,11 @@ mod tests {
 
     #[test]
     fn test_note_update() {
-        let mut note = Note::new(
-            "Test".to_string(),
-            "Content".to_string(),
-            vec![],
-        );
+        let mut note = Note::new("Test".to_string(), "Content".to_string(), vec![]);
         let old_version = note.version;
-        
+
         note.update("Updated".to_string(), "New Content".to_string(), vec![]);
-        
+
         assert_eq!(note.version, old_version + 1);
         assert_eq!(note.title, "Updated");
     }

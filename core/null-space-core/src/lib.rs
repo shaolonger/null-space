@@ -8,16 +8,16 @@
 //! - UUID-based conflict detection
 
 pub mod crypto;
+pub mod ffi;
+pub mod models;
 pub mod search;
 pub mod storage;
 pub mod vault;
-pub mod models;
-pub mod ffi;
 
-pub use crypto::{EncryptionManager, EncryptionError};
+pub use crypto::{EncryptionError, EncryptionManager};
 pub use search::{SearchEngine, SearchError};
 pub use storage::{FileStorage, StorageError};
-pub use vault::{VaultManager, VaultError};
+pub use vault::{VaultError, VaultManager};
 
 /// Result type for the library
 pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;

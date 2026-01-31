@@ -2,18 +2,19 @@
 //!
 //! This module provides C-compatible functions that can be called from other languages
 //! like Dart/Flutter. All functions use C-compatible types and follow FFI conventions.
+#![allow(clippy::not_unsafe_ptr_arg_deref)]
 
+use base64::{engine::general_purpose, Engine as _};
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_int, c_void};
 use std::path::{Path, PathBuf};
 use std::ptr;
-use base64::{Engine as _, engine::general_purpose};
 
 use crate::crypto::EncryptionManager;
-use crate::models::{Note, ConflictResolution};
+use crate::models::{ConflictResolution, Note};
 use crate::search::SearchEngine;
-use crate::vault::VaultManager;
 use crate::storage::FileStorage;
+use crate::vault::VaultManager;
 
 /// Initialize the library (currently a no-op, but reserved for future use)
 #[no_mangle]
@@ -38,7 +39,7 @@ pub extern "C" fn null_space_free(ptr: *mut c_void) {
 #[no_mangle]
 pub extern "C" fn null_space_generate_salt() -> *mut c_char {
     let salt = EncryptionManager::generate_salt();
-    
+
     match CString::new(salt) {
         Ok(c_str) => c_str.into_raw(),
         Err(_) => ptr::null_mut(),
@@ -46,12 +47,12 @@ pub extern "C" fn null_space_generate_salt() -> *mut c_char {
 }
 
 /// Encrypt data with a password and salt
-/// 
+///
 /// # Arguments
 /// * `data` - The plaintext data to encrypt (null-terminated C string)
 /// * `password` - The password to use for encryption (null-terminated C string)
 /// * `salt` - The salt for key derivation (null-terminated C string)
-/// 
+///
 /// # Returns
 /// A base64-encoded string containing the encrypted data, or null on error.
 /// The returned string must be freed with null_space_free_string.
@@ -111,12 +112,12 @@ pub extern "C" fn null_space_encrypt(
 }
 
 /// Decrypt data with a password and salt
-/// 
+///
 /// # Arguments
 /// * `encrypted` - Base64-encoded encrypted data (null-terminated C string)
 /// * `password` - The password to use for decryption (null-terminated C string)
 /// * `salt` - The salt for key derivation (null-terminated C string)
-/// 
+///
 /// # Returns
 /// The decrypted plaintext as a C string, or null on error.
 /// The returned string must be freed with null_space_free_string.
@@ -185,12 +186,12 @@ pub extern "C" fn null_space_decrypt(
 }
 
 /// Create a new note
-/// 
+///
 /// # Arguments
 /// * `title` - The note title (null-terminated C string)
 /// * `content` - The note content in Markdown (null-terminated C string)
 /// * `tags` - JSON array of tags as a string (null-terminated C string)
-/// 
+///
 /// # Returns
 /// JSON representation of the created note, or null on error.
 /// The returned string must be freed with null_space_free_string.
@@ -250,14 +251,14 @@ pub extern "C" fn null_space_create_note(
 }
 
 /// Update an existing note
-/// 
+///
 /// # Arguments
 /// * `note_json` - JSON representation of the note to update (null-terminated C string)
-/// 
+///
 /// # Returns
 /// JSON representation of the updated note with incremented version and timestamp, or null on error.
 /// The returned string must be freed with null_space_free_string.
-/// 
+///
 /// # Note
 /// This function expects the full note JSON with the updated title, content, and tags.
 /// It will increment the version number and update the timestamp automatically.
@@ -300,12 +301,12 @@ pub extern "C" fn null_space_update_note(note_json: *const c_char) -> *mut c_cha
 }
 
 /// Search notes in the index
-/// 
+///
 /// # Arguments
 /// * `index_path` - Path to the search index directory (null-terminated C string)
 /// * `query` - Search query string (null-terminated C string)
 /// * `limit` - Maximum number of results to return
-/// 
+///
 /// # Returns
 /// JSON array of search results, or null on error.
 /// The returned string must be freed with null_space_free_string.
@@ -361,13 +362,13 @@ pub extern "C" fn null_space_search(
 }
 
 /// Export a vault to a ZIP file
-/// 
+///
 /// # Arguments
 /// * `vault_json` - JSON representation of the vault metadata (null-terminated C string)
 /// * `notes_json` - JSON array of notes to export (null-terminated C string)
 /// * `output_path` - Path where to save the ZIP file (null-terminated C string)
 /// * `password` - Password for encrypting the vault (null-terminated C string)
-/// 
+///
 /// # Returns
 /// 0 on success, negative error code on failure:
 /// * -1: Null pointer in one or more parameters
@@ -455,15 +456,15 @@ pub extern "C" fn null_space_export_vault(
 }
 
 /// Import a vault from a ZIP file
-/// 
+///
 /// # Arguments
 /// * `input_path` - Path to the ZIP file to import (null-terminated C string)
 /// * `password` - Password for decrypting the vault (null-terminated C string, currently unused)
-/// 
+///
 /// # Returns
 /// JSON string with vault metadata and notes, or null on error.
 /// The returned string must be freed with null_space_free_string.
-/// 
+///
 /// # JSON Format
 /// ```json
 /// {
@@ -471,7 +472,7 @@ pub extern "C" fn null_space_export_vault(
 ///   "notes": [ ... ]
 /// }
 /// ```
-/// 
+///
 /// # Note on Encryption
 /// Currently, this function imports vaults without decryption.
 /// The password parameter is reserved for future use when vault-level encryption is implemented.
@@ -544,7 +545,7 @@ pub extern "C" fn null_space_import_vault(
 }
 
 /// Free a C string allocated by this library
-/// 
+///
 /// # Safety
 /// The pointer must have been returned by one of the FFI functions in this module.
 /// Calling this with any other pointer will result in undefined behavior.
@@ -573,11 +574,9 @@ mod tests {
     fn test_generate_salt() {
         let salt_ptr = null_space_generate_salt();
         assert!(!salt_ptr.is_null());
-        
-        let salt = unsafe {
-            CStr::from_ptr(salt_ptr).to_string_lossy().to_string()
-        };
-        
+
+        let salt = unsafe { CStr::from_ptr(salt_ptr).to_string_lossy().to_string() };
+
         assert!(!salt.is_empty());
         null_space_free_string(salt_ptr);
     }
@@ -587,33 +586,23 @@ mod tests {
         // Generate salt
         let salt_ptr = null_space_generate_salt();
         let salt = unsafe { CStr::from_ptr(salt_ptr) };
-        
+
         // Prepare test data
         let data = CString::new("Hello, World!").unwrap();
         let password = CString::new("test_password").unwrap();
-        
+
         // Encrypt
-        let encrypted_ptr = null_space_encrypt(
-            data.as_ptr(),
-            password.as_ptr(),
-            salt.as_ptr(),
-        );
+        let encrypted_ptr = null_space_encrypt(data.as_ptr(), password.as_ptr(), salt.as_ptr());
         assert!(!encrypted_ptr.is_null());
-        
+
         // Decrypt
-        let decrypted_ptr = null_space_decrypt(
-            encrypted_ptr,
-            password.as_ptr(),
-            salt.as_ptr(),
-        );
+        let decrypted_ptr = null_space_decrypt(encrypted_ptr, password.as_ptr(), salt.as_ptr());
         assert!(!decrypted_ptr.is_null());
-        
-        let decrypted = unsafe {
-            CStr::from_ptr(decrypted_ptr).to_string_lossy().to_string()
-        };
-        
+
+        let decrypted = unsafe { CStr::from_ptr(decrypted_ptr).to_string_lossy().to_string() };
+
         assert_eq!(decrypted, "Hello, World!");
-        
+
         // Cleanup
         null_space_free_string(salt_ptr);
         null_space_free_string(encrypted_ptr);
@@ -625,24 +614,18 @@ mod tests {
         let title = CString::new("Test Note").unwrap();
         let content = CString::new("This is test content").unwrap();
         let tags = CString::new(r#"["tag1", "tag2"]"#).unwrap();
-        
-        let note_ptr = null_space_create_note(
-            title.as_ptr(),
-            content.as_ptr(),
-            tags.as_ptr(),
-        );
+
+        let note_ptr = null_space_create_note(title.as_ptr(), content.as_ptr(), tags.as_ptr());
         assert!(!note_ptr.is_null());
-        
-        let note_json = unsafe {
-            CStr::from_ptr(note_ptr).to_string_lossy().to_string()
-        };
-        
+
+        let note_json = unsafe { CStr::from_ptr(note_ptr).to_string_lossy().to_string() };
+
         // Verify it's valid JSON
         let note: Note = serde_json::from_str(&note_json).unwrap();
         assert_eq!(note.title, "Test Note");
         assert_eq!(note.content, "This is test content");
         assert_eq!(note.tags, vec!["tag1", "tag2"]);
-        
+
         null_space_free_string(note_ptr);
     }
 
@@ -652,46 +635,38 @@ mod tests {
         let title = CString::new("Original Title").unwrap();
         let content = CString::new("Original content").unwrap();
         let tags = CString::new(r#"["tag1"]"#).unwrap();
-        
-        let note_ptr = null_space_create_note(
-            title.as_ptr(),
-            content.as_ptr(),
-            tags.as_ptr(),
-        );
+
+        let note_ptr = null_space_create_note(title.as_ptr(), content.as_ptr(), tags.as_ptr());
         assert!(!note_ptr.is_null());
-        
-        let note_json = unsafe {
-            CStr::from_ptr(note_ptr).to_string_lossy().to_string()
-        };
-        
+
+        let note_json = unsafe { CStr::from_ptr(note_ptr).to_string_lossy().to_string() };
+
         let mut note: Note = serde_json::from_str(&note_json).unwrap();
         let original_version = note.version;
-        
+
         // Modify the note
         note.title = "Updated Title".to_string();
         note.content = "Updated content".to_string();
         note.tags = vec!["tag1".to_string(), "tag2".to_string()];
-        
+
         let modified_json = serde_json::to_string(&note).unwrap();
         let modified_json_cstr = CString::new(modified_json).unwrap();
-        
+
         // Update the note
         let updated_ptr = null_space_update_note(modified_json_cstr.as_ptr());
         assert!(!updated_ptr.is_null());
-        
-        let updated_json = unsafe {
-            CStr::from_ptr(updated_ptr).to_string_lossy().to_string()
-        };
-        
+
+        let updated_json = unsafe { CStr::from_ptr(updated_ptr).to_string_lossy().to_string() };
+
         let updated_note: Note = serde_json::from_str(&updated_json).unwrap();
-        
+
         // Verify the update
         assert_eq!(updated_note.title, "Updated Title");
         assert_eq!(updated_note.content, "Updated content");
         assert_eq!(updated_note.tags, vec!["tag1", "tag2"]);
         assert_eq!(updated_note.version, original_version + 1);
         assert!(updated_note.updated_at > note.created_at);
-        
+
         // Cleanup
         null_space_free_string(note_ptr);
         null_space_free_string(updated_ptr);
@@ -705,7 +680,10 @@ mod tests {
         assert!(null_space_create_note(ptr::null(), ptr::null(), ptr::null()).is_null());
         assert!(null_space_update_note(ptr::null()).is_null());
         assert!(null_space_search(ptr::null(), ptr::null(), 10).is_null());
-        assert_eq!(null_space_export_vault(ptr::null(), ptr::null(), ptr::null(), ptr::null()), -1);
+        assert_eq!(
+            null_space_export_vault(ptr::null(), ptr::null(), ptr::null(), ptr::null()),
+            -1
+        );
         assert!(null_space_import_vault(ptr::null(), ptr::null()).is_null());
     }
 }

@@ -3,14 +3,14 @@
 //! Handles zip-based vault export/import with UUID-based conflict resolution.
 
 use crate::crypto::EncryptionManager;
-use crate::models::{Note, Vault, VaultMetadata, ConflictResolution};
+use crate::models::{ConflictResolution, Note, Vault, VaultMetadata};
 use crate::storage::FileStorage;
-use std::path::Path;
+use chrono::Utc;
 use std::io::{Read, Write};
+use std::path::Path;
 use thiserror::Error;
 use uuid::Uuid;
-use chrono::Utc;
-use zip::{ZipArchive, ZipWriter, write::FileOptions};
+use zip::{write::FileOptions, ZipArchive, ZipWriter};
 
 #[derive(Error, Debug)]
 pub enum VaultError {
@@ -49,8 +49,7 @@ impl VaultManager {
     ) -> Result<(), VaultError> {
         let file = std::fs::File::create(output_path)?;
         let mut zip = ZipWriter::new(file);
-        let options = FileOptions::default()
-            .compression_method(zip::CompressionMethod::Deflated);
+        let options = FileOptions::default().compression_method(zip::CompressionMethod::Deflated);
 
         // Write metadata
         let metadata = VaultMetadata {
@@ -112,13 +111,12 @@ impl VaultManager {
                 file.read_to_end(&mut data)?;
 
                 let note_json = if let Some(enc) = encryption {
-                    let decrypted = enc.decrypt(&data)
+                    let decrypted = enc
+                        .decrypt(&data)
                         .map_err(|e| VaultError::EncryptionError(e.to_string()))?;
-                    String::from_utf8(decrypted)
-                        .map_err(|_| VaultError::InvalidFormat)?
+                    String::from_utf8(decrypted).map_err(|_| VaultError::InvalidFormat)?
                 } else {
-                    String::from_utf8(data)
-                        .map_err(|_| VaultError::InvalidFormat)?
+                    String::from_utf8(data).map_err(|_| VaultError::InvalidFormat)?
                 };
 
                 let note: Note = serde_json::from_str(&note_json)?;
@@ -140,8 +138,9 @@ impl VaultManager {
         for imported in imported_notes {
             if let Some(existing) = existing_notes.iter().find(|n| n.id == imported.id) {
                 // Same UUID but different versions - conflict!
-                if existing.version != imported.version || 
-                   existing.updated_at != imported.updated_at {
+                if existing.version != imported.version
+                    || existing.updated_at != imported.updated_at
+                {
                     conflicts.push((existing.clone(), imported.clone()));
                 }
             }
@@ -194,7 +193,9 @@ mod tests {
         ];
 
         let export_path = temp_dir.path().join("export.zip");
-        manager.export_vault(&vault, &notes, &export_path, None).unwrap();
+        manager
+            .export_vault(&vault, &notes, &export_path, None)
+            .unwrap();
 
         let (imported_vault, imported_notes) = manager
             .import_vault(&export_path, None, ConflictResolution::Overwrite)
@@ -211,7 +212,7 @@ mod tests {
         let manager = VaultManager::new(storage);
 
         let note1 = Note::new("Note".to_string(), "Content".to_string(), vec![]);
-        
+
         let mut note2 = note1.clone();
         note2.update("Updated".to_string(), "New Content".to_string(), vec![]);
 

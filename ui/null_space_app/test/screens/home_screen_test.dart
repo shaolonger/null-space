@@ -5,6 +5,10 @@ import 'package:null_space_app/providers/vault_provider.dart';
 import 'package:null_space_app/providers/note_provider.dart';
 import 'package:null_space_app/providers/search_provider.dart';
 import 'package:null_space_app/providers/settings_provider.dart';
+import 'package:null_space_app/services/search_service.dart';
+import 'package:null_space_app/bridge/rust_bridge.dart';
+import 'package:null_space_app/models/note.dart';
+import 'package:null_space_app/models/vault.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,7 +23,7 @@ void main() {
       SharedPreferences.setMockInitialValues({});
       vaultProvider = VaultProvider();
       noteProvider = NoteProvider();
-      searchProvider = SearchProvider();
+      searchProvider = SearchProvider(searchService: FakeSearchService());
       settingsProvider = SettingsProvider();
     });
 
@@ -246,4 +250,68 @@ void main() {
       expect(find.byType(NavigationBar), findsOneWidget);
     });
   });
+}
+
+class FakeSearchService extends SearchService {
+  FakeSearchService() : super(bridge: _FakeRustBridge());
+}
+
+class _FakeRustBridge extends RustBridge {
+  @override
+  void init() {}
+
+  @override
+  void dispose() {}
+
+  @override
+  List<Map<String, dynamic>> search(String indexPath, String query, int limit) {
+    return [];
+  }
+
+  @override
+  String generateSalt() => 'mock-salt';
+
+  @override
+  String encrypt(String data, String password, String salt) => data;
+
+  @override
+  String decrypt(String encryptedData, String password, String salt) =>
+      encryptedData;
+
+  @override
+  Note createNote(String title, String content, List<String> tags) {
+    return Note(
+      id: 'mock-note',
+      title: title,
+      content: content,
+      tags: tags,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      version: 1,
+    );
+  }
+
+  @override
+  Note updateNote(Note note) => note;
+
+  @override
+  bool exportVault(
+      Vault vault, List<Note> notes, String outputPath, String password) {
+    return true;
+  }
+
+  @override
+  Map<String, dynamic> importVault(String inputPath, String password) {
+    return {
+      'vault': Vault(
+        id: 'mock-vault',
+        name: 'Mock Vault',
+        description: '',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        salt: 'mock-salt',
+      ),
+      'notes': <Note>[],
+    };
+  }
 }

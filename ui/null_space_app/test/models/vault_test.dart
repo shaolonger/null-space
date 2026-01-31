@@ -114,7 +114,7 @@ void main() {
     test('handles special characters in name', () {
       final vault = Vault(
         id: 'vault-special',
-        name: 'Vault! @#$% Name',
+        name: 'Vault! @#\$% Name',
         description: 'Description',
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
@@ -142,7 +142,7 @@ void main() {
     });
 
     test('handles very long description', () {
-      final longDescription = 'A' * 5000; // 5,000 characters
+      final longDescription = List.filled(5000, 'A').join(); // 5,000 characters
       final vault = Vault(
         id: 'vault-long-desc',
         name: 'Vault Name',
@@ -160,7 +160,7 @@ void main() {
     });
 
     test('handles long salt values', () {
-      final longSalt = 'a' * 1000; // Very long salt
+      final longSalt = List.filled(1000, 'a').join(); // Very long salt
       final vault = Vault(
         id: 'vault-long-salt',
         name: 'Vault Name',

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:null_space_app/models/vault.dart';
+import 'package:null_space_app/models/note.dart';
 import 'package:null_space_app/services/vault_service.dart';
 import 'package:null_space_app/services/file_storage.dart';
 import 'package:null_space_app/bridge/rust_bridge.dart';
@@ -36,32 +37,65 @@ class MockRustBridge extends RustBridge {
   String decrypt(String ciphertext, String password, String salt) {
     return ciphertext.replaceFirst('encrypted_', '');
   }
-}
-
-class MockFileStorage extends FileStorage {
-  final Map<String, List<int>> _files = {};
-  final Set<String> _directories = {};
-  bool shouldFailWrite = false;
 
   @override
-  Future<void> init() async {}
+  Note createNote(String title, String content, List<String> tags) {
+    return Note(
+      id: 'mock-note',
+      title: title,
+      content: content,
+      tags: tags,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      version: 1,
+    );
+  }
+
+  @override
+  Note updateNote(Note note) => note;
+
+  @override
+  List<Map<String, dynamic>> search(String indexPath, String query, int limit) {
+    return [];
+  }
+
+  @override
+  bool exportVault(
+      Vault vault, List<Note> notes, String outputPath, String password) {
+    return true;
+  }
+
+  @override
+  Map<String, dynamic> importVault(String inputPath, String password) {
+    return {
+      'vault': Vault(
+        id: 'mock-vault',
+        name: 'Mock Vault',
+        description: '',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        salt: 'mock-salt',
+      ),
+      'notes': <Note>[],
+    };
+  }
+}
+
+class MockFileStorage implements FileStorage {
+  final Map<String, List<int>> _files = {};
+  final Set<String> _directories = {};
+
+  @override
+  String get basePath => '/tmp/mock';
 
   @override
   Future<void> writeFile(String path, List<int> data) async {
-    if (shouldFailWrite) {
-      throw Exception('Failed to write file');
-    }
     _files[path] = data;
   }
 
   @override
   Future<List<int>> readFile(String path) async {
     return _files[path] ?? [];
-  }
-
-  @override
-  Future<bool> exists(String path) async {
-    return _files.containsKey(path);
   }
 
   @override
@@ -73,6 +107,23 @@ class MockFileStorage extends FileStorage {
   Future<void> deleteDirectory(String path) async {
     _directories.remove(path);
     _files.removeWhere((key, value) => key.startsWith('$path/'));
+  }
+
+  @override
+  Future<bool> exists(String path) async {
+    return _files.containsKey(path) || _directories.contains(path);
+  }
+
+  @override
+  Future<void> deleteFile(String path) async {
+    _files.remove(path);
+  }
+
+  @override
+  Future<List<String>> listFiles(String directory) async {
+    return _files.keys
+        .where((path) => path.startsWith('$directory/'))
+        .toList();
   }
 }
 
@@ -225,16 +276,24 @@ void main() {
       await tester.pumpAndSettle();
 
       // Initially, password should be obscured
-      var passwordWidget = tester.widget<TextFormField>(passwordField);
-      expect(passwordWidget.obscureText, true);
+      final passwordVisibilityToggle = find.descendant(
+        of: passwordField,
+        matching: find.byIcon(Icons.visibility),
+      );
+      expect(passwordVisibilityToggle, findsOneWidget);
 
       // Tap visibility toggle
-      await tester.tap(find.byIcon(Icons.visibility).first);
+      await tester.tap(passwordVisibilityToggle);
       await tester.pumpAndSettle();
 
       // Password should now be visible
-      passwordWidget = tester.widget<TextFormField>(passwordField);
-      expect(passwordWidget.obscureText, false);
+      expect(
+        find.descendant(
+          of: passwordField,
+          matching: find.byIcon(Icons.visibility_off),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows password strength indicator', (WidgetTester tester) async {

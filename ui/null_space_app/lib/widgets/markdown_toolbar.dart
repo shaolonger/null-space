@@ -294,8 +294,11 @@ class _MarkdownToolbarFieldState extends State<MarkdownToolbarField> {
     // Don't handle shortcuts if editor is disabled
     if (!widget.enabled) return KeyEventResult.ignored;
     
-    final isControlPressed = HardwareKeyboard.instance.isControlPressed || 
-                            HardwareKeyboard.instance.isMetaPressed;
+    final pressedKeys = HardwareKeyboard.instance.logicalKeysPressed;
+    final isControlPressed = pressedKeys.contains(LogicalKeyboardKey.controlLeft) ||
+        pressedKeys.contains(LogicalKeyboardKey.controlRight) ||
+        pressedKeys.contains(LogicalKeyboardKey.metaLeft) ||
+        pressedKeys.contains(LogicalKeyboardKey.metaRight);
     
     if (!isControlPressed) return KeyEventResult.ignored;
     

@@ -2,15 +2,12 @@
 //!
 //! Provides indexing and searching for notes with Markdown support.
 
+use std::path::PathBuf;
 use tantivy::{
-    collector::TopDocs,
-    doc,
-    query::QueryParser,
-    schema::*,
-    Index, IndexWriter, IndexReader, TantivyDocument,
+    collector::TopDocs, doc, query::QueryParser, schema::*, Index, IndexReader, IndexWriter,
+    TantivyDocument,
 };
 use thiserror::Error;
-use std::path::PathBuf;
 
 #[derive(Error, Debug)]
 pub enum SearchError {
@@ -32,23 +29,22 @@ impl SearchEngine {
     /// Create a new search engine with an index at the given path
     pub fn new(index_path: PathBuf) -> Result<Self, SearchError> {
         let mut schema_builder = Schema::builder();
-        
+
         schema_builder.add_text_field("id", TEXT | STORED);
         schema_builder.add_text_field("title", TEXT | STORED);
         schema_builder.add_text_field("content", TEXT);
         schema_builder.add_text_field("tags", TEXT | STORED);
         schema_builder.add_date_field("created_at", INDEXED | STORED);
         schema_builder.add_date_field("updated_at", INDEXED | STORED);
-        
+
         let schema = schema_builder.build();
-        
-        std::fs::create_dir_all(&index_path)
-            .map_err(|e| SearchError::IndexError(e.to_string()))?;
-        
+
+        std::fs::create_dir_all(&index_path).map_err(|e| SearchError::IndexError(e.to_string()))?;
+
         let index = Index::create_in_dir(&index_path, schema.clone())
             .or_else(|_| Index::open_in_dir(&index_path))
             .map_err(|e| SearchError::IndexError(e.to_string()))?;
-        
+
         Ok(Self { index, schema })
     }
 
@@ -105,7 +101,8 @@ impl SearchEngine {
 
     /// Search for notes
     pub fn search(&self, query_str: &str, limit: usize) -> Result<Vec<(f32, String)>, SearchError> {
-        let reader: IndexReader = self.index
+        let reader: IndexReader = self
+            .index
             .reader()
             .map_err(|e| SearchError::IndexError(e.to_string()))?;
 
@@ -115,10 +112,8 @@ impl SearchEngine {
         let content_field = self.schema.get_field("content").unwrap();
         let tags_field = self.schema.get_field("tags").unwrap();
 
-        let query_parser = QueryParser::for_index(
-            &self.index,
-            vec![title_field, content_field, tags_field],
-        );
+        let query_parser =
+            QueryParser::for_index(&self.index, vec![title_field, content_field, tags_field]);
 
         let query = query_parser
             .parse_query(query_str)
@@ -160,15 +155,17 @@ mod tests {
         let engine = SearchEngine::new(index_path).unwrap();
         let mut writer = engine.get_writer().unwrap();
 
-        engine.index_note(
-            &mut writer,
-            "note-1",
-            "My First Note",
-            "This is the content of my first note",
-            &["personal".to_string(), "test".to_string()],
-            1640000000,
-            1640000000,
-        ).unwrap();
+        engine
+            .index_note(
+                &mut writer,
+                "note-1",
+                "My First Note",
+                "This is the content of my first note",
+                &["personal".to_string(), "test".to_string()],
+                1640000000,
+                1640000000,
+            )
+            .unwrap();
 
         engine.commit(&mut writer).unwrap();
 

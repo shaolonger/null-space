@@ -6,8 +6,8 @@ use aes_gcm::{
     aead::{Aead, KeyInit, OsRng},
     Aes256Gcm, Nonce,
 };
-use argon2::{Argon2, PasswordHasher};
 use argon2::password_hash::SaltString;
+use argon2::{Argon2, PasswordHasher};
 use rand::RngCore;
 use thiserror::Error;
 
@@ -33,24 +33,26 @@ impl EncryptionManager {
     pub fn new_from_password(password: &str, salt: &str) -> Result<Self, EncryptionError> {
         let salt = SaltString::from_b64(salt)
             .map_err(|e| EncryptionError::KeyDerivationFailed(e.to_string()))?;
-        
+
         let argon2 = Argon2::default();
         let password_hash = argon2
             .hash_password(password.as_bytes(), &salt)
             .map_err(|e| EncryptionError::KeyDerivationFailed(e.to_string()))?;
-        
-        let hash_bytes = password_hash.hash.ok_or(
-            EncryptionError::KeyDerivationFailed("No hash generated".to_string())
-        )?;
-        
+
+        let hash_bytes = password_hash
+            .hash
+            .ok_or(EncryptionError::KeyDerivationFailed(
+                "No hash generated".to_string(),
+            ))?;
+
         let key_bytes = hash_bytes.as_bytes();
         if key_bytes.len() < 32 {
             return Err(EncryptionError::InvalidKeyLength);
         }
-        
+
         let cipher = Aes256Gcm::new_from_slice(&key_bytes[..32])
             .map_err(|e| EncryptionError::KeyDerivationFailed(e.to_string()))?;
-        
+
         Ok(Self { cipher })
     }
 
@@ -65,7 +67,8 @@ impl EncryptionManager {
         OsRng.fill_bytes(&mut nonce_bytes);
         let nonce = Nonce::from_slice(&nonce_bytes);
 
-        let ciphertext = self.cipher
+        let ciphertext = self
+            .cipher
             .encrypt(nonce, plaintext)
             .map_err(|e| EncryptionError::EncryptionFailed(e.to_string()))?;
 
@@ -79,7 +82,7 @@ impl EncryptionManager {
     pub fn decrypt(&self, encrypted_data: &[u8]) -> Result<Vec<u8>, EncryptionError> {
         if encrypted_data.len() < 12 {
             return Err(EncryptionError::DecryptionFailed(
-                "Data too short to contain nonce".to_string()
+                "Data too short to contain nonce".to_string(),
             ));
         }
 

@@ -19,7 +19,7 @@ class MockLocalAuthentication extends LocalAuthentication {
   bool throwOnCanCheckBiometrics = false;
 
   @override
-  Future<bool> canCheckBiometrics() async {
+  Future<bool> get canCheckBiometrics async {
     if (throwOnCanCheckBiometrics) {
       throw Exception('Test exception in canCheckBiometrics');
     }
@@ -42,7 +42,12 @@ class MockLocalAuthentication extends LocalAuthentication {
   @override
   Future<bool> authenticate({
     required String localizedReason,
-    required AuthenticationOptions options,
+    List<AuthMessages> authMessages = const <AuthMessages>[
+      IOSAuthMessages(),
+      AndroidAuthMessages(),
+      WindowsAuthMessages(),
+    ],
+    AuthenticationOptions options = const AuthenticationOptions(),
   }) async {
     if (mockAuthenticateException != null) {
       throw mockAuthenticateException!;

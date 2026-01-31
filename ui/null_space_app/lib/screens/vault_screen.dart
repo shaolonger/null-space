@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../models/note.dart';
 import '../models/vault.dart';
 import '../providers/vault_provider.dart';
 import '../services/vault_service.dart';
@@ -231,7 +232,7 @@ class _VaultScreenState extends State<VaultScreen> {
       }
 
       // TODO: Load notes from vault
-      final notes = []; // Placeholder - would need NoteService integration
+      final notes = <Note>[]; // Placeholder - would need NoteService integration
       
       await _vaultService!.exportVault(
         vault: vault,

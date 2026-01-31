@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'note_editor_screen.dart';
 import 'notes_list_screen.dart';
 import 'vault_screen.dart';
 import 'search_screen.dart';
 import 'settings_screen.dart';
-import '../providers/vault_provider.dart';
 
 /// Home screen with navigation
 class HomeScreen extends StatefulWidget {

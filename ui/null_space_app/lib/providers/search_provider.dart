@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import '../models/note.dart';
 import '../services/search_service.dart';
 
 /// Provider for managing search state and operations

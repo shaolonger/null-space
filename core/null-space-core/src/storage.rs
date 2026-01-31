@@ -37,11 +37,11 @@ impl FileStorage {
     /// Write data to a file
     pub fn write_file(&self, relative_path: &str, data: &[u8]) -> Result<(), StorageError> {
         let full_path = self.get_path(relative_path);
-        
+
         if let Some(parent) = full_path.parent() {
             fs::create_dir_all(parent)?;
         }
-        
+
         fs::write(full_path, data)?;
         Ok(())
     }
@@ -49,22 +49,22 @@ impl FileStorage {
     /// Read data from a file
     pub fn read_file(&self, relative_path: &str) -> Result<Vec<u8>, StorageError> {
         let full_path = self.get_path(relative_path);
-        
+
         if !full_path.exists() {
             return Err(StorageError::NotFound(relative_path.to_string()));
         }
-        
+
         Ok(fs::read(full_path)?)
     }
 
     /// Delete a file
     pub fn delete_file(&self, relative_path: &str) -> Result<(), StorageError> {
         let full_path = self.get_path(relative_path);
-        
+
         if !full_path.exists() {
             return Err(StorageError::NotFound(relative_path.to_string()));
         }
-        
+
         fs::remove_file(full_path)?;
         Ok(())
     }
@@ -77,13 +77,13 @@ impl FileStorage {
     /// List all files in a directory recursively
     pub fn list_files(&self, relative_path: &str) -> Result<Vec<String>, StorageError> {
         let full_path = self.get_path(relative_path);
-        
+
         if !full_path.exists() {
             return Ok(Vec::new());
         }
-        
+
         let mut files = Vec::new();
-        
+
         for entry in WalkDir::new(full_path).into_iter().filter_map(|e| e.ok()) {
             if entry.file_type().is_file() {
                 let path = entry.path();
@@ -94,7 +94,7 @@ impl FileStorage {
                 }
             }
         }
-        
+
         Ok(files)
     }
 
@@ -138,7 +138,9 @@ mod tests {
         let temp_dir = tempdir().unwrap();
         let storage = FileStorage::new(temp_dir.path().to_path_buf()).unwrap();
 
-        storage.write_file("folder/nested/file.txt", b"nested").unwrap();
+        storage
+            .write_file("folder/nested/file.txt", b"nested")
+            .unwrap();
         assert!(storage.exists("folder/nested/file.txt"));
 
         let files = storage.list_files("").unwrap();
