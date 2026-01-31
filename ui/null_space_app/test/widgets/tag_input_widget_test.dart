@@ -140,12 +140,12 @@ void main() {
     testWidgets('does not show already selected tags in suggestions', 
         (WidgetTester tester) async {
       final availableTags = ['work', 'urgent', 'personal'];
-      List<String> capturedTags = [];
+      List<String> observedTagChanges = [];
       await tester.pumpWidget(createWidget(
         availableTags: availableTags,
         initialTags: ['work'],
         onTagsChanged: (newTags) {
-          capturedTags = newTags;
+          observedTagChanges = newTags;
         },
       ));
 
@@ -154,14 +154,20 @@ void main() {
       await tester.pumpAndSettle();
 
       // Widget should build successfully
-      expect(capturedTags, isEmpty);
+      expect(observedTagChanges, isEmpty);
       expect(find.widgetWithText(ListTile, 'work'), findsNothing);
       expect(find.byType(TextField), findsOneWidget);
 
       await tester.enterText(find.byType(TextField), 'u');
       await tester.pumpAndSettle();
 
-      expect(find.widgetWithText(ListTile, 'urgent'), findsOneWidget);
+      final urgentSuggestion = find.widgetWithText(ListTile, 'urgent');
+      expect(urgentSuggestion, findsOneWidget);
+
+      await tester.tap(urgentSuggestion);
+      await tester.pumpAndSettle();
+
+      expect(observedTagChanges, containsAll(['work', 'urgent']));
     });
 
     testWidgets('clears input after adding tag', (WidgetTester tester) async {
