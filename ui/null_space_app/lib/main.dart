@@ -4,6 +4,7 @@ import 'screens/home_screen.dart';
 import 'providers/vault_provider.dart';
 import 'providers/note_provider.dart';
 import 'providers/search_provider.dart';
+import 'providers/settings_provider.dart';
 import 'services/search_service.dart';
 import 'bridge/rust_bridge.dart';
 import 'models/note.dart';
@@ -11,9 +12,12 @@ import 'models/note.dart';
 // Global RustBridge instance (singleton pattern)
 final _rustBridge = RustBridge();
 
-void main() {
+void main() async {
   // Initialize Rust bridge once at startup
   _rustBridge.init();
+  
+  // Ensure Flutter bindings are initialized
+  WidgetsFlutterBinding.ensureInitialized();
   
   runApp(const NullSpaceApp());
 }
@@ -39,14 +43,34 @@ class NullSpaceApp extends StatelessWidget {
             searchService: SearchService(bridge: _rustBridge),
           ),
         ),
-      ],
-      child: MaterialApp(
-        title: 'Null Space',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
+        ChangeNotifierProvider(
+          create: (_) {
+            final provider = SettingsProvider();
+            // Load settings from storage
+            provider.loadSettings();
+            return provider;
+          },
         ),
-        home: const HomeScreen(),
+      ],
+      child: Consumer<SettingsProvider>(
+        builder: (context, settings, child) {
+          return MaterialApp(
+            title: 'Null Space',
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+              useMaterial3: true,
+            ),
+            darkTheme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.deepPurple,
+                brightness: Brightness.dark,
+              ),
+              useMaterial3: true,
+            ),
+            themeMode: settings.themeMode,
+            home: const HomeScreen(),
+          );
+        },
       ),
     );
   }
