@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'screens/home_screen.dart';
 import 'providers/vault_provider.dart';
@@ -8,6 +9,7 @@ import 'providers/settings_provider.dart';
 import 'services/search_service.dart';
 import 'bridge/rust_bridge.dart';
 import 'models/note.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 // Global RustBridge instance (singleton pattern)
 final _rustBridge = RustBridge();
@@ -56,6 +58,23 @@ class NullSpaceApp extends StatelessWidget {
         builder: (context, settings, child) {
           return MaterialApp(
             title: 'Null Space',
+            // Localization delegates
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            // Supported locales
+            supportedLocales: const [
+              Locale('en'),           // English
+              Locale('zh'),           // Chinese Simplified
+              Locale('zh', 'Hant'),   // Chinese Traditional
+              Locale('ja'),           // Japanese
+              Locale('ko'),           // Korean
+            ],
+            // Use locale from settings, or system default if null
+            locale: settings.locale,
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
               useMaterial3: true,

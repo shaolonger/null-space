@@ -28,6 +28,7 @@ class SettingsProvider extends ChangeNotifier {
   Duration _autoSaveInterval = const Duration(seconds: 30);
   bool _spellCheckEnabled = true;
   String _dataDirectory = '';
+  Locale? _locale; // null means system default
 
   // Keys for SharedPreferences
   static const String _themeModeKey = 'theme_mode';
@@ -40,6 +41,7 @@ class SettingsProvider extends ChangeNotifier {
   static const String _autoSaveIntervalKey = 'auto_save_interval';
   static const String _spellCheckEnabledKey = 'spell_check_enabled';
   static const String _dataDirectoryKey = 'data_directory';
+  static const String _localeKey = 'locale';
 
   // Getters
   ThemeMode get themeMode => _themeMode;
@@ -52,6 +54,7 @@ class SettingsProvider extends ChangeNotifier {
   Duration get autoSaveInterval => _autoSaveInterval;
   bool get spellCheckEnabled => _spellCheckEnabled;
   String get dataDirectory => _dataDirectory;
+  Locale? get locale => _locale;
 
   /// Load settings from SharedPreferences
   Future<void> loadSettings() async {
@@ -94,6 +97,13 @@ class SettingsProvider extends ChangeNotifier {
 
     // Load data directory
     _dataDirectory = prefs.getString(_dataDirectoryKey) ?? '';
+
+    // Load locale
+    final localeString = prefs.getString(_localeKey);
+    if (localeString != null && localeString.isNotEmpty) {
+      final parts = localeString.split('_');
+      _locale = Locale(parts[0], parts.length > 1 ? parts[1] : null);
+    }
 
     notifyListeners();
   }
@@ -208,6 +218,24 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Set locale
+  ///
+  /// Pass null to use system default. Throws an exception if persistence fails.
+  Future<void> setLocale(Locale? locale) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (locale == null) {
+      await prefs.remove(_localeKey);
+    } else {
+      final localeString = locale.countryCode != null
+          ? '${locale.languageCode}_${locale.countryCode}'
+          : locale.languageCode;
+      await prefs.setString(_localeKey, localeString);
+    }
+    
+    _locale = locale;
+    notifyListeners();
+  }
+
   /// Reset all settings to defaults
   Future<void> resetToDefaults() async {
     _themeMode = ThemeMode.system;
@@ -220,6 +248,7 @@ class SettingsProvider extends ChangeNotifier {
     _autoSaveInterval = const Duration(seconds: 30);
     _spellCheckEnabled = true;
     _dataDirectory = '';
+    _locale = null;
     
     notifyListeners();
     
