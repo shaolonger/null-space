@@ -36,11 +36,22 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
   String? _errorMessage;
   int _failedAttempts = 0;
   bool _biometricsAvailable = false;
+  bool _checkedBiometrics = false;
 
   @override
   void initState() {
     super.initState();
-    _checkBiometricAvailability();
+    // Check biometric availability will be done in didChangeDependencies
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Only check once
+    if (!_checkedBiometrics) {
+      _checkedBiometrics = true;
+      _checkBiometricAvailability();
+    }
   }
 
   /// Check if biometrics are available and enabled
@@ -49,7 +60,7 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
       return;
     }
 
-    final settings = context.read<SettingsProvider>();
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
     if (!settings.biometricEnabled) {
       return;
     }

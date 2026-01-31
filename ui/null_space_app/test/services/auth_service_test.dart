@@ -15,9 +15,14 @@ class MockLocalAuthentication extends LocalAuthentication {
   List<BiometricType> mockAvailableBiometrics = [BiometricType.fingerprint];
   bool mockAuthenticateResult = true;
   PlatformException? mockAuthenticateException;
+  bool throwOnGetAvailableBiometrics = false;
+  bool throwOnCanCheckBiometrics = false;
 
   @override
   Future<bool> canCheckBiometrics() async {
+    if (throwOnCanCheckBiometrics) {
+      throw Exception('Test exception in canCheckBiometrics');
+    }
     return mockCanCheckBiometrics;
   }
 
@@ -28,6 +33,9 @@ class MockLocalAuthentication extends LocalAuthentication {
 
   @override
   Future<List<BiometricType>> getAvailableBiometrics() async {
+    if (throwOnGetAvailableBiometrics) {
+      throw Exception('Test exception in getAvailableBiometrics');
+    }
     return mockAvailableBiometrics;
   }
 
@@ -102,13 +110,11 @@ void main() {
       });
 
       test('returns false when an exception occurs', () async {
-        // Create a mock that throws an exception
+        // Create a mock that throws an exception when checking available biometrics
         final throwingMock = MockLocalAuthentication();
         throwingMock.mockCanCheckBiometrics = true;
         throwingMock.mockIsDeviceSupported = true;
-        // Make getAvailableBiometrics throw by returning empty list
-        // which will cause the logic to return false
-        throwingMock.mockAvailableBiometrics = [];
+        throwingMock.throwOnGetAvailableBiometrics = true;
         
         final testService = AuthService(localAuth: throwingMock);
         final result = await testService.canUseBiometrics();
@@ -140,7 +146,7 @@ void main() {
       test('returns empty list on exception', () async {
         // Create a mock that throws when getAvailableBiometrics is called
         final failingMock = MockLocalAuthentication();
-        failingMock.mockAvailableBiometrics = [];
+        failingMock.throwOnGetAvailableBiometrics = true;
         final failingService = AuthService(localAuth: failingMock);
 
         final result = await failingService.getAvailableBiometrics();
