@@ -277,8 +277,8 @@ void main() {
 
       // Initially, password should be obscured
       var passwordWidget = tester.widget<TextFormField>(passwordField);
-      final passwordTextField = passwordWidget.decoration?.suffixIcon as IconButton?;
-      final passwordIcon = passwordTextField?.icon as Icon?;
+      final passwordIconButton = passwordWidget.decoration?.suffixIcon as IconButton?;
+      final passwordIcon = passwordIconButton?.icon as Icon?;
       expect(passwordIcon?.icon, Icons.visibility);
 
       // Tap visibility toggle
