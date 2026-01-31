@@ -118,8 +118,10 @@ void main() {
       // Even though this shouldn't happen in practice, test the behavior
       final futureDate = now.add(const Duration(days: 1));
       final result = DateFormatter.formatRelativeDate(futureDate);
-      // The function should still return something valid
+      // The function should still return something valid (likely a formatted date or "just now")
       expect(result, isNotEmpty);
+      // Future dates should not show "ago" suffix
+      expect(result, isNot(contains('ago')));
     });
 
     test('handles very old dates', () {
@@ -162,16 +164,19 @@ void main() {
     });
 
     test('handles different time zones consistently', () {
-      // Create dates in UTC and local time
-      final utcDate = DateTime.utc(2024, 1, 15, 10, 0, 0);
-      final localDate = utcDate.toLocal();
+      // Create dates that are 2 hours ago in both UTC and local time
+      final currentUtc = DateTime.now().toUtc();
+      final twoHoursAgoUtc = currentUtc.subtract(const Duration(hours: 2));
+      final twoHoursAgoLocal = twoHoursAgoUtc.toLocal();
       
       // Both should format the same way when processed
-      final result1 = DateFormatter.formatRelativeDate(utcDate);
-      final result2 = DateFormatter.formatRelativeDate(localDate);
+      final result1 = DateFormatter.formatRelativeDate(twoHoursAgoUtc);
+      final result2 = DateFormatter.formatRelativeDate(twoHoursAgoLocal);
       
       // Results should be consistent (both are the same moment in time)
+      // Both should show "2h ago"
       expect(result1, result2);
+      expect(result1, '2h ago');
     });
 
     test('handles leap year dates correctly', () {

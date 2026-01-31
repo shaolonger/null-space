@@ -166,8 +166,9 @@ void main() {
       expect(tags, contains('personal'));
       expect(tags, contains('shopping'));
       
-      // Check if sorted
-      expect(tags, equals(tags.toList()..sort()));
+      // Check if sorted by comparing with explicitly sorted version
+      final expectedSorted = ['dart', 'flutter', 'mobile', 'personal', 'shopping', 'tutorial'];
+      expect(tags, equals(expectedSorted));
     });
 
     test('tagCounts returns correct counts', () {
@@ -386,7 +387,7 @@ void main() {
         id: 'note-dupe',
         title: 'Dupe',
         content: 'Content',
-        tags: ['flutter', 'flutter'],
+        tags: ['flutter', 'flutter'], // Duplicate tag in same note
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
         version: 1,
@@ -395,7 +396,8 @@ void main() {
       provider.setNotes([note1, noteWithDupeTags]);
       
       final counts = provider.tagCounts;
-      // Should count each occurrence (2 from noteWithDupeTags, 1 from note1)
+      // Should count each occurrence in the list, even duplicates within same note
+      // note1 has 'flutter' once, noteWithDupeTags has 'flutter' twice = 3 total
       expect(counts['flutter'], 3);
     });
   });
