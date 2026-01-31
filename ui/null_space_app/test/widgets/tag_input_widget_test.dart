@@ -157,6 +157,11 @@ void main() {
       expect(capturedTags, isEmpty);
       expect(find.widgetWithText(ListTile, 'work'), findsNothing);
       expect(find.byType(TextField), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField), 'u');
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(ListTile, 'urgent'), findsOneWidget);
     });
 
     testWidgets('clears input after adding tag', (WidgetTester tester) async {
