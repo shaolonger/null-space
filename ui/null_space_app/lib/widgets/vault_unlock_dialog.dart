@@ -1,20 +1,26 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/vault.dart';
 import '../services/vault_service.dart';
+import '../services/auth_service.dart';
+import '../providers/settings_provider.dart';
 
 /// Dialog for unlocking a vault
 /// 
 /// This dialog prompts the user to enter a password to unlock a vault.
-/// It includes password validation, error handling, and warnings for
-/// multiple failed attempts.
+/// It includes password validation, error handling, biometric authentication,
+/// and warnings for multiple failed attempts.
 class VaultUnlockDialog extends StatefulWidget {
   final Vault vault;
   final VaultService vaultService;
+  final AuthService? authService;
 
   const VaultUnlockDialog({
     super.key,
     required this.vault,
     required this.vaultService,
+    this.authService,
   });
 
   @override
@@ -29,6 +35,37 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
   bool _isLoading = false;
   String? _errorMessage;
   int _failedAttempts = 0;
+  bool _biometricsAvailable = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkBiometricAvailability();
+  }
+
+  /// Check if biometrics are available and enabled
+  Future<void> _checkBiometricAvailability() async {
+    if (widget.authService == null) {
+      return;
+    }
+
+    final settings = context.read<SettingsProvider>();
+    if (!settings.biometricEnabled) {
+      return;
+    }
+
+    final available = await widget.authService!.canUseBiometrics();
+    if (mounted) {
+      setState(() {
+        _biometricsAvailable = available;
+      });
+
+      // Automatically attempt biometric auth if available
+      if (available) {
+        _authenticateWithBiometrics();
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -45,6 +82,59 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
       return 'Password is required';
     }
     return null;
+  }
+
+  /// Authenticate with biometrics
+  Future<void> _authenticateWithBiometrics() async {
+    if (widget.authService == null || !_biometricsAvailable) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // Attempt to unlock with biometrics and retrieve stored password
+      final password = await widget.authService!.unlockWithBiometrics(
+        vaultId: widget.vault.id,
+        reason: 'Unlock ${widget.vault.name}',
+      );
+
+      if (!mounted) return;
+
+      if (password != null) {
+        // Successfully retrieved password, now unlock the vault
+        final success = await widget.vaultService.unlockVault(
+          vault: widget.vault,
+          password: password,
+        );
+
+        if (success && mounted) {
+          // Vault unlocked successfully
+          Navigator.of(context).pop(true);
+        } else if (mounted) {
+          // Password was wrong or vault unlock failed
+          setState(() {
+            _isLoading = false;
+            _errorMessage = 'Failed to unlock vault. Please use password.';
+          });
+        }
+      } else {
+        // Biometric authentication failed or no password stored
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Biometric authentication failed. Please use password.';
+        });
+      }
+    }
   }
 
   /// Unlock vault
@@ -78,6 +168,19 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
         _isLoading = false;
       });
       return;
+    }
+
+    // If biometric auth is available and enabled, store password for future biometric unlock
+    if (widget.authService != null && _biometricsAvailable) {
+      try {
+        await widget.authService!.storeVaultPassword(
+          vaultId: widget.vault.id,
+          password: _passwordController.text,
+        );
+      } catch (e) {
+        // Log but don't fail the unlock if password storage fails
+        debugPrint('Failed to store password for biometric unlock: $e');
+      }
     }
 
     // Close dialog and return success
@@ -167,8 +270,21 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
                 validator: _validatePassword,
                 enabled: !_isLoading,
                 onFieldSubmitted: (_) => _unlockVault(),
-                autofocus: true,
+                autofocus: !_biometricsAvailable,
               ),
+
+              // Biometric unlock button
+              if (_biometricsAvailable) ...[
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: _isLoading ? null : _authenticateWithBiometrics,
+                  icon: const Icon(Icons.fingerprint),
+                  label: const Text('Unlock with Biometrics'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                  ),
+                ),
+              ],
 
               // Error message
               if (_errorMessage != null) ...[
