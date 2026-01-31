@@ -158,7 +158,7 @@ void main() {
       provider.setNotes([note1, note2, note3]);
       
       final tags = provider.allTags;
-      expect(tags.length, 5);
+      expect(tags.length, 6); // 6 unique tags across all notes
       expect(tags, contains('flutter'));
       expect(tags, contains('dart'));
       expect(tags, contains('tutorial'));
