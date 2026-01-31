@@ -742,19 +742,9 @@
     "description": "Auto-lock never option description"
   },
 
-  "lockAfterOneHour": "Lock after 1 hour",
-  "@lockAfterOneHour": {
-    "description": "Auto-lock 1 hour description"
-  },
-
-  "lockAfterMinutes": "Lock after {minutes} minutes",
-  "@lockAfterMinutes": {
-    "description": "Auto-lock minutes description",
-    "placeholders": {
-      "minutes": {
-        "type": "int"
-      }
-    }
+  "neverLockAutomatically": "Never lock automatically",
+  "@neverLockAutomatically": {
+    "description": "Never auto-lock description"
   },
 
   "editOnly": "Edit only",
