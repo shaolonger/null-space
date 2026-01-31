@@ -26,6 +26,7 @@ dependencies:
   # Storage
   sqflite: ^2.3.0
   shared_preferences: ^2.2.2
+  flutter_secure_storage: ^9.0.0
   
   # UUID generation
   uuid: ^4.2.2
@@ -39,6 +40,9 @@ dependencies:
   # App info
   package_info_plus: ^5.0.1
   url_launcher: ^6.2.2
+  
+  # Biometric authentication
+  local_auth: ^2.1.8
 
 dev_dependencies:
   flutter_test:
