@@ -444,9 +444,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _getAutoLockLabel(BuildContext context, Duration duration) {
     final l10n = AppLocalizations.of(context)!;
     if (duration == Duration.zero) {
-      return l10n.neverLockAutomatically;
+      return l10n.neverLock;
     } else if (duration.inHours > 0) {
-      return l10n.lockAfterOneHour;
+      return l10n.lockAfterHours(duration.inHours);
     } else {
       return l10n.lockAfterMinutes(duration.inMinutes);
     }

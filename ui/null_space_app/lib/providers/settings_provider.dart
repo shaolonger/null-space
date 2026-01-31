@@ -101,8 +101,13 @@ class SettingsProvider extends ChangeNotifier {
     // Load locale
     final localeString = prefs.getString(_localeKey);
     if (localeString != null && localeString.isNotEmpty) {
-      final parts = localeString.split('_');
-      _locale = Locale(parts[0], parts.length > 1 ? parts[1] : null);
+      // Handle script codes (e.g., zh_Hant for Traditional Chinese)
+      if (localeString == 'zh_Hant') {
+        _locale = const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant');
+      } else {
+        final parts = localeString.split('_');
+        _locale = Locale(parts[0], parts.length > 1 ? parts[1] : null);
+      }
     }
 
     notifyListeners();
@@ -226,9 +231,15 @@ class SettingsProvider extends ChangeNotifier {
     if (locale == null) {
       await prefs.remove(_localeKey);
     } else {
-      final localeString = locale.countryCode != null
-          ? '${locale.languageCode}_${locale.countryCode}'
-          : locale.languageCode;
+      // Handle script codes (e.g., Traditional Chinese)
+      String localeString;
+      if (locale.scriptCode != null) {
+        localeString = '${locale.languageCode}_${locale.scriptCode}';
+      } else if (locale.countryCode != null) {
+        localeString = '${locale.languageCode}_${locale.countryCode}';
+      } else {
+        localeString = locale.languageCode;
+      }
       await prefs.setString(_localeKey, localeString);
     }
     

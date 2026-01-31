@@ -67,11 +67,11 @@ class NullSpaceApp extends StatelessWidget {
             ],
             // Supported locales
             supportedLocales: const [
-              Locale('en'),           // English
-              Locale('zh'),           // Chinese Simplified
-              Locale('zh', 'Hant'),   // Chinese Traditional
-              Locale('ja'),           // Japanese
-              Locale('ko'),           // Korean
+              Locale('en'),                                           // English
+              Locale('zh'),                                           // Chinese Simplified
+              Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),  // Chinese Traditional
+              Locale('ja'),                                           // Japanese
+              Locale('ko'),                                           // Korean
             ],
             // Use locale from settings, or system default if null
             locale: settings.locale,

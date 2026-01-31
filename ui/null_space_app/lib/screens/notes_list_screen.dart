@@ -277,7 +277,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${l10n.delete} "${note.title.isEmpty ? l10n.untitledNote : note.title}"'),
+            content: Text(l10n.noteDeleted),
             action: SnackBarAction(
               label: 'Undo',
               onPressed: () {
@@ -294,13 +294,12 @@ class _NotesListScreenState extends State<NotesListScreen> {
 
   Future<bool?> _confirmDelete(Note note) {
     final l10n = AppLocalizations.of(context)!;
+    final noteTitle = note.title.isEmpty ? l10n.untitledNote : note.title;
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.deleteNote),
-        content: Text(
-          '${l10n.deleteNoteMessage.split('?')[0]} "${note.title.isEmpty ? l10n.untitledNote : note.title}"?',
-        ),
+        content: Text(l10n.deleteNoteConfirmation(noteTitle)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),

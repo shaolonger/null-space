@@ -446,6 +446,17 @@
     "description": "Delete note confirmation message"
   },
   
+  "deleteNoteConfirmation": "Delete \"{title}\"?",
+  "@deleteNoteConfirmation": {
+    "description": "Delete note confirmation with title",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "My Note"
+      }
+    }
+  },
+  
   "noteSaved": "Note saved",
   "@noteSaved": {
     "description": "Note saved success message"
@@ -864,5 +875,32 @@
   "loading": "Loading...",
   "@loading": {
     "description": "Loading indicator text"
+  },
+  
+  "lockAfterMinutes": "Lock after {count} minute(s)",
+  "@lockAfterMinutes": {
+    "description": "Auto-lock timeout in minutes",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  
+  "lockAfterHours": "Lock after {count} hour(s)",
+  "@lockAfterHours": {
+    "description": "Auto-lock timeout in hours",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  
+  "neverLock": "Never lock automatically",
+  "@neverLock": {
+    "description": "Never auto-lock option"
   }
 }

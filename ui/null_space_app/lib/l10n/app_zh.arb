@@ -117,7 +117,11 @@
   "genericError": "发生错误，请重试。",
   "english": "英语",
   "chineseSimplified": "简体中文",
-  "chineseTraditional": "繁體中文",
+  "chineseTraditional": "繁体中文",
   "japanese": "日语",
-  "korean": "韩语"
+  "korean": "韩语",
+  "deleteNoteConfirmation": "删除 \"{title}\"？",
+  "lockAfterMinutes": "{count}分钟后锁定",
+  "lockAfterHours": "{count}小时后锁定",
+  "neverLock": "从不自动锁定"
 }

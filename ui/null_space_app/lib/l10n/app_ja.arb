@@ -119,5 +119,9 @@
   "chineseSimplified": "簡体字中国語",
   "chineseTraditional": "繁体字中国語",
   "japanese": "日本語",
-  "korean": "韓国語"
+  "korean": "韓国語",
+  "deleteNoteConfirmation": "\"{title}\"を削除？",
+  "lockAfterMinutes": "{count}分後にロック",
+  "lockAfterHours": "{count}時間後にロック",
+  "neverLock": "自動ロックしない"
 }
