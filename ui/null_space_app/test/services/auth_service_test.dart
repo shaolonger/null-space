@@ -42,7 +42,7 @@ class MockLocalAuthentication extends LocalAuthentication {
   @override
   Future<bool> authenticate({
     required String localizedReason,
-    Iterable<AuthMessages> authMessages = const <AuthMessages>[
+    List<AuthMessages> authMessages = const <AuthMessages>[
       IOSAuthMessages(),
       AndroidAuthMessages(),
       WindowsAuthMessages(),
