@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/note.dart';
 import '../providers/note_provider.dart';
 import '../services/note_service.dart';
@@ -232,20 +233,21 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       return;
     }
 
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Note'),
-        content: const Text('Are you sure you want to delete this note? This action cannot be undone.'),
+        title: Text(l10n.deleteNote),
+        content: Text(l10n.deleteNoteMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -294,20 +296,21 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       return;
     }
 
+    final l10n = AppLocalizations.of(context)!;
     final shouldPop = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Unsaved Changes'),
-        content: const Text('You have unsaved changes. Do you want to discard them?'),
+        title: Text(l10n.unsavedChanges),
+        content: Text(l10n.unsavedChangesMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Discard'),
+            child: Text(l10n.discard),
           ),
         ],
       ),
@@ -320,6 +323,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     // Show error state if initialization failed
     if (_initializationFailed) {
       return Scaffold(
@@ -358,17 +363,17 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         final shouldPop = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Unsaved Changes'),
-            content: const Text('You have unsaved changes. Do you want to discard them?'),
+            title: Text(l10n.unsavedChanges),
+            content: Text(l10n.unsavedChangesMessage),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
+                child: Text(l10n.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
                 style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: const Text('Discard'),
+                child: Text(l10n.discard),
               ),
             ],
           ),
@@ -380,19 +385,19 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.note == null ? 'New Note' : 'Edit Note'),
+          title: Text(widget.note == null ? l10n.newNote : l10n.editNote),
           actions: [
             // Preview toggle button
             IconButton(
               icon: Icon(_isPreviewMode ? Icons.edit : Icons.visibility),
-              tooltip: _isPreviewMode ? 'Edit' : 'Preview',
+              tooltip: _isPreviewMode ? l10n.editMode : l10n.previewMode,
               onPressed: _isSaving || _isInitializing ? null : _togglePreview,
             ),
             // Delete button (only for existing notes)
             if (widget.note != null)
               IconButton(
                 icon: const Icon(Icons.delete),
-                tooltip: 'Delete',
+                tooltip: l10n.delete,
                 onPressed: _isSaving || _isInitializing ? null : _deleteNote,
               ),
           ],
@@ -412,13 +417,13 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                             // Title field
                             TextFormField(
                               controller: _titleController,
-                              decoration: const InputDecoration(
-                                labelText: 'Title',
-                                border: OutlineInputBorder(),
+                              decoration: InputDecoration(
+                                labelText: l10n.title,
+                                border: const OutlineInputBorder(),
                               ),
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter a title';
+                                  return l10n.titleRequired;
                                 }
                                 return null;
                               },
@@ -451,16 +456,16 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                             else
                               TextFormField(
                                 controller: _contentController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Content',
-                                  hintText: 'Write your note in Markdown...',
-                                  border: OutlineInputBorder(),
+                                decoration: InputDecoration(
+                                  labelText: l10n.content,
+                                  hintText: l10n.writeNoteHint,
+                                  border: const OutlineInputBorder(),
                                   alignLabelWithHint: true,
                                 ),
                                 maxLines: 15,
                                 validator: (value) {
                                   if (value == null || value.trim().isEmpty) {
-                                    return 'Please enter some content';
+                                    return l10n.contentRequired;
                                   }
                                   return null;
                                 },
@@ -468,9 +473,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                             const SizedBox(height: 16),
                             
                             // Tags section
-                            const Text(
-                              'Tags',
-                              style: TextStyle(
+                            Text(
+                              l10n.tags,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -512,7 +517,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                               onPressed: _isSaving || _isInitializing
                                   ? null
                                   : _handleCancel,
-                              child: const Text('Cancel'),
+                              child: Text(l10n.cancel),
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -520,7 +525,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                             flex: 2,
                             child: ElevatedButton(
                               onPressed: _isSaving || _isInitializing ? null : _saveNote,
-                              child: const Text('Save'),
+                              child: Text(l10n.save),
                             ),
                           ),
                         ],

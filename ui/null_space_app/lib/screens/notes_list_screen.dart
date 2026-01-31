@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/note.dart';
 import '../providers/note_provider.dart';
 import '../widgets/note_card.dart';
@@ -19,17 +20,18 @@ class _NotesListScreenState extends State<NotesListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Consumer<NoteProvider>(
       builder: (context, noteProvider, child) {
         final notes = _sortNotes(noteProvider.notes);
 
         if (notes.isEmpty) {
-          return _buildEmptyState();
+          return _buildEmptyState(l10n);
         }
 
         return Column(
           children: [
-            _buildSortBar(),
+            _buildSortBar(l10n),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: _onRefresh,
@@ -67,7 +69,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(AppLocalizations l10n) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -79,12 +81,12 @@ class _NotesListScreenState extends State<NotesListScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            'No notes yet',
+            l10n.noNotesYet,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 8),
           Text(
-            'Tap + to create your first note',
+            l10n.createFirstNote,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
                 ),
@@ -94,7 +96,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
     );
   }
 
-  Widget _buildSortBar() {
+  Widget _buildSortBar(AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -125,7 +127,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
                         hasFilters ? Icons.filter_alt : Icons.filter_alt_outlined,
                       ),
                     ),
-                    tooltip: 'Filter by tags',
+                    tooltip: l10n.filterByTags,
                     onPressed: () => _showTagFilter(context),
                   );
                 },
@@ -133,7 +135,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
               // Sort button
               PopupMenuButton<SortOption>(
                 icon: const Icon(Icons.sort),
-                tooltip: 'Sort notes',
+                tooltip: l10n.sortBy,
                 onSelected: (option) {
                   setState(() {
                     _sortOption = option;
@@ -151,7 +153,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
                           size: 20,
                         ),
                         const SizedBox(width: 8),
-                        const Text('Recently Updated'),
+                        Text(l10n.recentlyUpdated),
                       ],
                     ),
                   ),
@@ -166,7 +168,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
                           size: 20,
                         ),
                         const SizedBox(width: 8),
-                        const Text('Recently Created'),
+                        Text(l10n.recentlyCreated),
                       ],
                     ),
                   ),
@@ -181,7 +183,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
                           size: 20,
                         ),
                         const SizedBox(width: 8),
-                        const Text('Title A-Z'),
+                        Text(l10n.titleAZ),
                       ],
                     ),
                   ),
@@ -196,7 +198,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
                           size: 20,
                         ),
                         const SizedBox(width: 8),
-                        const Text('Title Z-A'),
+                        Text(l10n.titleZA),
                       ],
                     ),
                   ),
@@ -220,16 +222,18 @@ class _NotesListScreenState extends State<NotesListScreen> {
         sortedNotes.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         break;
       case SortOption.titleAsc:
+        final l10n = AppLocalizations.of(context)!;
         sortedNotes.sort((a, b) {
-          final titleA = a.title.isEmpty ? 'Untitled Note' : a.title;
-          final titleB = b.title.isEmpty ? 'Untitled Note' : b.title;
+          final titleA = a.title.isEmpty ? l10n.untitledNote : a.title;
+          final titleB = b.title.isEmpty ? l10n.untitledNote : b.title;
           return titleA.toLowerCase().compareTo(titleB.toLowerCase());
         });
         break;
       case SortOption.titleDesc:
+        final l10n = AppLocalizations.of(context)!;
         sortedNotes.sort((a, b) {
-          final titleA = a.title.isEmpty ? 'Untitled Note' : a.title;
-          final titleB = b.title.isEmpty ? 'Untitled Note' : b.title;
+          final titleA = a.title.isEmpty ? l10n.untitledNote : a.title;
+          final titleB = b.title.isEmpty ? l10n.untitledNote : b.title;
           return titleB.toLowerCase().compareTo(titleA.toLowerCase());
         });
         break;
@@ -267,12 +271,13 @@ class _NotesListScreenState extends State<NotesListScreen> {
     final confirmed = await _confirmDelete(note);
     if (confirmed == true) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         final noteProvider = Provider.of<NoteProvider>(context, listen: false);
         noteProvider.deleteNote(note.id);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Note "${note.title.isEmpty ? 'Untitled Note' : note.title}" deleted'),
+            content: Text(l10n.noteDeleted),
             action: SnackBarAction(
               label: 'Undo',
               onPressed: () {
@@ -288,22 +293,22 @@ class _NotesListScreenState extends State<NotesListScreen> {
   }
 
   Future<bool?> _confirmDelete(Note note) {
+    final l10n = AppLocalizations.of(context)!;
+    final noteTitle = note.title.isEmpty ? l10n.untitledNote : note.title;
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Note'),
-        content: Text(
-          'Are you sure you want to delete "${note.title.isEmpty ? 'Untitled Note' : note.title}"?',
-        ),
+        title: Text(l10n.deleteNote),
+        content: Text(l10n.deleteNoteConfirmation(noteTitle)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(
-              'Delete',
+              l10n.delete,
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/vault.dart';
 import '../providers/vault_provider.dart';
 import '../services/vault_service.dart';
@@ -399,6 +400,8 @@ class _VaultScreenState extends State<VaultScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     if (_isInitializing) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -454,7 +457,7 @@ class _VaultScreenState extends State<VaultScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _isLoading ? null : _showCreateVaultDialog,
                       icon: const Icon(Icons.add),
-                      label: const Text('Create Vault'),
+                      label: Text(l10n.createVault),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -462,7 +465,7 @@ class _VaultScreenState extends State<VaultScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _isLoading ? null : _handleImportVault,
                       icon: const Icon(Icons.upload),
-                      label: const Text('Import'),
+                      label: Text(l10n.import),
                     ),
                   ),
                 ],
@@ -483,13 +486,13 @@ class _VaultScreenState extends State<VaultScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'No Vaults',
+                            l10n.noVaults,
                             style: Theme.of(context).textTheme.headlineSmall,
                           ),
                           const SizedBox(height: 8),
-                          const Text(
-                            'Create a new vault to get started',
-                            style: TextStyle(color: Colors.grey),
+                          Text(
+                            l10n.createNewVaultPrompt,
+                            style: const TextStyle(color: Colors.grey),
                           ),
                         ],
                       ),
@@ -543,14 +546,16 @@ class _ImportPasswordDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return AlertDialog(
-      title: const Text('Import Vault'),
+      title: Text(l10n.importVault),
       content: TextField(
         controller: controller,
-        decoration: const InputDecoration(
-          labelText: 'Vault Password',
+        decoration: InputDecoration(
+          labelText: l10n.password,
           hintText: 'Enter the vault password',
-          border: OutlineInputBorder(),
+          border: const OutlineInputBorder(),
         ),
         obscureText: true,
         autofocus: true,
@@ -558,11 +563,11 @@ class _ImportPasswordDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(controller.text),
-          child: const Text('Import'),
+          child: Text(l10n.import),
         ),
       ],
     );
@@ -581,25 +586,27 @@ class _RenameVaultDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return AlertDialog(
-      title: const Text('Rename Vault'),
+      title: Text(l10n.renameVault),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: nameController,
-            decoration: const InputDecoration(
-              labelText: 'Vault Name',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.vaultName,
+              border: const OutlineInputBorder(),
             ),
             autofocus: true,
           ),
           const SizedBox(height: 16),
           TextField(
             controller: descriptionController,
-            decoration: const InputDecoration(
-              labelText: 'Description',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.description,
+              border: const OutlineInputBorder(),
             ),
             maxLines: 2,
           ),
@@ -608,7 +615,7 @@ class _RenameVaultDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
         FilledButton(
           onPressed: () {
@@ -617,7 +624,7 @@ class _RenameVaultDialog extends StatelessWidget {
               'description': descriptionController.text,
             });
           },
-          child: const Text('Save'),
+          child: Text(l10n.save),
         ),
       ],
     );
