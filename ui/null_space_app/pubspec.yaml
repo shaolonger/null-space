@@ -56,9 +56,9 @@ flutter:
   generate: true
   
   # Assets
-  # assets:
+  assets:
+    - assets/icon/
   #   - images/
-  #   - icons/
 
   # Fonts
   # fonts:
