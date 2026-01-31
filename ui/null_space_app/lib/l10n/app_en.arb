@@ -594,5 +594,275 @@
   "korean": "Korean",
   "@korean": {
     "description": "Korean language name"
+  },
+
+  "oneHour": "1 hour",
+  "@oneHour": {
+    "description": "1 hour timeout option"
+  },
+
+  "useFingerprintOrFaceUnlock": "Use fingerprint or face unlock",
+  "@useFingerprintOrFaceUnlock": {
+    "description": "Biometric unlock subtitle"
+  },
+
+  "clearClipboardAfterPaste": "Clear Clipboard After Paste",
+  "@clearClipboardAfterPaste": {
+    "description": "Clear clipboard setting label"
+  },
+
+  "automaticallyClearClipboardForSecurity": "Automatically clear clipboard for security",
+  "@automaticallyClearClipboardForSecurity": {
+    "description": "Clear clipboard subtitle"
+  },
+
+  "defaultViewMode": "Default View Mode",
+  "@defaultViewMode": {
+    "description": "Default view mode setting label"
+  },
+
+  "autoSaveInterval": "Auto-save Interval",
+  "@autoSaveInterval": {
+    "description": "Auto-save interval setting label"
+  },
+
+  "tenSeconds": "10 seconds",
+  "@tenSeconds": {
+    "description": "10 seconds interval option"
+  },
+
+  "thirtySeconds": "30 seconds",
+  "@thirtySeconds": {
+    "description": "30 seconds interval option"
+  },
+
+  "fiveMinutesInterval": "5 minutes",
+  "@fiveMinutesInterval": {
+    "description": "5 minutes interval option"
+  },
+
+  "manualOnly": "Manual only",
+  "@manualOnly": {
+    "description": "Manual only option"
+  },
+
+  "spellCheck": "Spell Check",
+  "@spellCheck": {
+    "description": "Spell check setting label"
+  },
+
+  "checkSpellingWhileTyping": "Check spelling while typing",
+  "@checkSpellingWhileTyping": {
+    "description": "Spell check subtitle"
+  },
+
+  "dataDirectory": "Data Directory",
+  "@dataDirectory": {
+    "description": "Data directory setting label"
+  },
+
+  "defaultLocation": "Default location",
+  "@defaultLocation": {
+    "description": "Default data directory location"
+  },
+
+  "clearSearchIndex": "Clear Search Index",
+  "@clearSearchIndex": {
+    "description": "Clear search index setting label"
+  },
+
+  "rebuildSearchIndexFromScratch": "Rebuild search index from scratch",
+  "@rebuildSearchIndexFromScratch": {
+    "description": "Clear search index subtitle"
+  },
+
+  "exportAllData": "Export All Data",
+  "@exportAllData": {
+    "description": "Export all data setting label"
+  },
+
+  "exportAllVaultsAndNotes": "Export all vaults and notes",
+  "@exportAllVaultsAndNotes": {
+    "description": "Export all data subtitle"
+  },
+
+  "licenses": "Licenses",
+  "@licenses": {
+    "description": "Licenses label"
+  },
+
+  "sourceCode": "Source Code",
+  "@sourceCode": {
+    "description": "Source code label"
+  },
+
+  "resetToDefaults": "Reset to Defaults",
+  "@resetToDefaults": {
+    "description": "Reset to defaults label"
+  },
+
+  "resetAllSettingsToDefaultValues": "Reset all settings to default values",
+  "@resetAllSettingsToDefaultValues": {
+    "description": "Reset to defaults subtitle"
+  },
+
+  "reset": "Reset",
+  "@reset": {
+    "description": "Reset button"
+  },
+
+  "followSystemSetting": "Follow system setting",
+  "@followSystemSetting": {
+    "description": "Theme mode system option description"
+  },
+
+  "lightTheme": "Light theme",
+  "@lightTheme": {
+    "description": "Theme mode light option description"
+  },
+
+  "darkTheme": "Dark theme",
+  "@darkTheme": {
+    "description": "Theme mode dark option description"
+  },
+
+  "neverLockAutomatically": "Never lock automatically",
+  "@neverLockAutomatically": {
+    "description": "Auto-lock never option description"
+  },
+
+  "lockAfterOneHour": "Lock after 1 hour",
+  "@lockAfterOneHour": {
+    "description": "Auto-lock 1 hour description"
+  },
+
+  "lockAfterMinutes": "Lock after {minutes} minutes",
+  "@lockAfterMinutes": {
+    "description": "Auto-lock minutes description",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+
+  "editOnly": "Edit only",
+  "@editOnly": {
+    "description": "Editor view mode edit option description"
+  },
+
+  "previewOnly": "Preview only",
+  "@previewOnly": {
+    "description": "Editor view mode preview option description"
+  },
+
+  "sideBySideEditAndPreview": "Side-by-side edit and preview",
+  "@sideBySideEditAndPreview": {
+    "description": "Editor view mode split option description"
+  },
+
+  "manualSaveOnly": "Manual save only",
+  "@manualSaveOnly": {
+    "description": "Auto-save manual only option description"
+  },
+
+  "saveEveryMinute": "Save every {minutes} minute",
+  "@saveEveryMinute": {
+    "description": "Auto-save minutes description (singular)",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+
+  "saveEveryMinutes": "Save every {minutes} minutes",
+  "@saveEveryMinutes": {
+    "description": "Auto-save minutes description (plural)",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+
+  "saveEverySeconds": "Save every {seconds} seconds",
+  "@saveEverySeconds": {
+    "description": "Auto-save seconds description",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+
+  "changeDataDirectory": "Change Data Directory",
+  "@changeDataDirectory": {
+    "description": "Change data directory dialog title"
+  },
+
+  "changeDataDirectoryMessage": "This feature allows you to change where your vaults and notes are stored. Implementation coming soon.",
+  "@changeDataDirectoryMessage": {
+    "description": "Change data directory dialog message"
+  },
+
+  "clearSearchIndexTitle": "Clear Search Index",
+  "@clearSearchIndexTitle": {
+    "description": "Clear search index dialog title"
+  },
+
+  "clearSearchIndexMessage": "This will clear the search index and rebuild it from scratch. This may take a few moments.",
+  "@clearSearchIndexMessage": {
+    "description": "Clear search index dialog message"
+  },
+
+  "searchIndexCleared": "Search index cleared",
+  "@searchIndexCleared": {
+    "description": "Search index cleared success message"
+  },
+
+  "exportAllDataTitle": "Export All Data",
+  "@exportAllDataTitle": {
+    "description": "Export all data dialog title"
+  },
+
+  "exportAllDataMessage": "This will export all your vaults and notes to a ZIP file. You can then back up or transfer this file.",
+  "@exportAllDataMessage": {
+    "description": "Export all data dialog message"
+  },
+
+  "exportFeatureComingSoon": "Export feature coming soon",
+  "@exportFeatureComingSoon": {
+    "description": "Export feature coming soon message"
+  },
+
+  "resetSettingsTitle": "Reset Settings",
+  "@resetSettingsTitle": {
+    "description": "Reset settings dialog title"
+  },
+
+  "resetSettingsMessage": "Are you sure you want to reset all settings to their default values? This action cannot be undone.",
+  "@resetSettingsMessage": {
+    "description": "Reset settings dialog message"
+  },
+
+  "settingsResetToDefaults": "Settings reset to defaults",
+  "@settingsResetToDefaults": {
+    "description": "Settings reset to defaults success message"
+  },
+
+  "couldNotLaunchUrl": "Could not launch {url}",
+  "@couldNotLaunchUrl": {
+    "description": "Could not launch URL error message",
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+
+  "loading": "Loading...",
+  "@loading": {
+    "description": "Loading indicator text"
   }
 }

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// Settings screen with various app preferences
 class SettingsScreen extends StatefulWidget {
@@ -30,9 +31,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(l10n.settingsTitle),
         elevation: 2,
       ),
       body: Consumer<SettingsProvider>(
@@ -56,14 +58,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildAppearanceSection(BuildContext context, SettingsProvider settings) {
+    final l10n = AppLocalizations.of(context)!;
     return ExpansionTile(
       leading: const Icon(Icons.palette),
-      title: const Text('Appearance'),
+      title: Text(l10n.appearance),
       initiallyExpanded: true,
       children: [
         ListTile(
-          title: const Text('Theme'),
-          subtitle: Text(_getThemeModeLabel(settings.themeMode)),
+          title: Text(l10n.theme),
+          subtitle: Text(_getThemeModeLabel(context, settings.themeMode)),
           trailing: DropdownButton<ThemeMode>(
             value: settings.themeMode,
             onChanged: (ThemeMode? mode) {
@@ -71,24 +74,66 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 settings.setThemeMode(mode);
               }
             },
-            items: const [
+            items: [
               DropdownMenuItem(
                 value: ThemeMode.system,
-                child: Text('System'),
+                child: Text(l10n.system),
               ),
               DropdownMenuItem(
                 value: ThemeMode.light,
-                child: Text('Light'),
+                child: Text(l10n.light),
               ),
               DropdownMenuItem(
                 value: ThemeMode.dark,
-                child: Text('Dark'),
+                child: Text(l10n.dark),
               ),
             ],
           ),
         ),
         ListTile(
-          title: const Text('Font Size'),
+          title: Text(l10n.language),
+          subtitle: Text(_getLanguageLabel(context, settings.locale)),
+          trailing: DropdownButton<String?>(
+            value: settings.locale?.toString(),
+            onChanged: (String? localeCode) {
+              if (localeCode == null) {
+                settings.setLocale(null);
+              } else if (localeCode == 'zh_Hant') {
+                settings.setLocale(const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'));
+              } else {
+                settings.setLocale(Locale(localeCode));
+              }
+            },
+            items: [
+              DropdownMenuItem(
+                value: null,
+                child: Text(l10n.system),
+              ),
+              DropdownMenuItem(
+                value: 'en',
+                child: Text(l10n.english),
+              ),
+              DropdownMenuItem(
+                value: 'zh',
+                child: Text(l10n.chineseSimplified),
+              ),
+              DropdownMenuItem(
+                value: 'zh_Hant',
+                child: Text(l10n.chineseTraditional),
+              ),
+              DropdownMenuItem(
+                value: 'ja',
+                child: Text(l10n.japanese),
+              ),
+              DropdownMenuItem(
+                value: 'ko',
+                child: Text(l10n.korean),
+              ),
+            ],
+          ),
+        ),
+        ListTile(
+          title: Text(l10n.fontSize),
           subtitle: Text('${settings.fontSize.toInt()}pt'),
           trailing: SizedBox(
             width: 200,
@@ -105,7 +150,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         ListTile(
-          title: const Text('Line Spacing'),
+          title: Text(l10n.lineSpacing),
           subtitle: Text('${settings.lineSpacing.toStringAsFixed(1)}'),
           trailing: SizedBox(
             width: 200,
@@ -126,14 +171,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildSecuritySection(BuildContext context, SettingsProvider settings) {
+    final l10n = AppLocalizations.of(context)!;
     return ExpansionTile(
       leading: const Icon(Icons.security),
-      title: const Text('Security'),
+      title: Text(l10n.security),
       initiallyExpanded: false,
       children: [
         ListTile(
-          title: const Text('Auto-lock Timeout'),
-          subtitle: Text(_getAutoLockLabel(settings.autoLockTimeout)),
+          title: Text(l10n.autoLockTimeout),
+          subtitle: Text(_getAutoLockLabel(context, settings.autoLockTimeout)),
           trailing: DropdownButton<Duration>(
             value: settings.autoLockTimeout,
             onChanged: (Duration? duration) {
@@ -141,45 +187,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 settings.setAutoLockTimeout(duration);
               }
             },
-            items: const [
+            items: [
               DropdownMenuItem(
-                value: Duration(minutes: 1),
-                child: Text('1 minute'),
+                value: const Duration(minutes: 1),
+                child: Text(l10n.oneMinute),
               ),
               DropdownMenuItem(
-                value: Duration(minutes: 5),
-                child: Text('5 minutes'),
+                value: const Duration(minutes: 5),
+                child: Text(l10n.fiveMinutes),
               ),
               DropdownMenuItem(
-                value: Duration(minutes: 15),
-                child: Text('15 minutes'),
+                value: const Duration(minutes: 15),
+                child: Text(l10n.fifteenMinutes),
               ),
               DropdownMenuItem(
-                value: Duration(minutes: 30),
-                child: Text('30 minutes'),
+                value: const Duration(minutes: 30),
+                child: Text(l10n.thirtyMinutes),
               ),
               DropdownMenuItem(
-                value: Duration(hours: 1),
-                child: Text('1 hour'),
+                value: const Duration(hours: 1),
+                child: Text(l10n.oneHour),
               ),
               DropdownMenuItem(
                 value: Duration.zero,
-                child: Text('Never'),
+                child: Text(l10n.never),
               ),
             ],
           ),
         ),
         SwitchListTile(
-          title: const Text('Biometric Unlock'),
-          subtitle: const Text('Use fingerprint or face unlock'),
+          title: Text(l10n.biometricUnlock),
+          subtitle: Text(l10n.useFingerprintOrFaceUnlock),
           value: settings.biometricEnabled,
           onChanged: (value) {
             settings.setBiometricEnabled(value);
           },
         ),
         SwitchListTile(
-          title: const Text('Clear Clipboard After Paste'),
-          subtitle: const Text('Automatically clear clipboard for security'),
+          title: Text(l10n.clearClipboardAfterPaste),
+          subtitle: Text(l10n.automaticallyClearClipboardForSecurity),
           value: settings.clearClipboard,
           onChanged: (value) {
             settings.setClearClipboard(value);
@@ -190,14 +236,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildEditorSection(BuildContext context, SettingsProvider settings) {
+    final l10n = AppLocalizations.of(context)!;
     return ExpansionTile(
       leading: const Icon(Icons.edit),
-      title: const Text('Editor'),
+      title: Text(l10n.editor),
       initiallyExpanded: false,
       children: [
         ListTile(
-          title: const Text('Default View Mode'),
-          subtitle: Text(_getViewModeLabel(settings.editorViewMode)),
+          title: Text(l10n.defaultViewMode),
+          subtitle: Text(_getViewModeLabel(context, settings.editorViewMode)),
           trailing: DropdownButton<EditorViewMode>(
             value: settings.editorViewMode,
             onChanged: (EditorViewMode? mode) {
@@ -205,25 +252,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 settings.setEditorViewMode(mode);
               }
             },
-            items: const [
+            items: [
               DropdownMenuItem(
                 value: EditorViewMode.edit,
-                child: Text('Edit'),
+                child: Text(l10n.editMode),
               ),
               DropdownMenuItem(
                 value: EditorViewMode.preview,
-                child: Text('Preview'),
+                child: Text(l10n.previewMode),
               ),
               DropdownMenuItem(
                 value: EditorViewMode.split,
-                child: Text('Split'),
+                child: Text(l10n.splitMode),
               ),
             ],
           ),
         ),
         ListTile(
-          title: const Text('Auto-save Interval'),
-          subtitle: Text(_getAutoSaveLabel(settings.autoSaveInterval)),
+          title: Text(l10n.autoSaveInterval),
+          subtitle: Text(_getAutoSaveLabel(context, settings.autoSaveInterval)),
           trailing: DropdownButton<Duration>(
             value: settings.autoSaveInterval,
             onChanged: (Duration? interval) {
@@ -231,33 +278,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 settings.setAutoSaveInterval(interval);
               }
             },
-            items: const [
+            items: [
               DropdownMenuItem(
-                value: Duration(seconds: 10),
-                child: Text('10 seconds'),
+                value: const Duration(seconds: 10),
+                child: Text(l10n.tenSeconds),
               ),
               DropdownMenuItem(
-                value: Duration(seconds: 30),
-                child: Text('30 seconds'),
+                value: const Duration(seconds: 30),
+                child: Text(l10n.thirtySeconds),
               ),
               DropdownMenuItem(
-                value: Duration(minutes: 1),
-                child: Text('1 minute'),
+                value: const Duration(minutes: 1),
+                child: Text(l10n.oneMinute),
               ),
               DropdownMenuItem(
-                value: Duration(minutes: 5),
-                child: Text('5 minutes'),
+                value: const Duration(minutes: 5),
+                child: Text(l10n.fiveMinutesInterval),
               ),
               DropdownMenuItem(
                 value: Duration.zero,
-                child: Text('Manual only'),
+                child: Text(l10n.manualOnly),
               ),
             ],
           ),
         ),
         SwitchListTile(
-          title: const Text('Spell Check'),
-          subtitle: const Text('Check spelling while typing'),
+          title: Text(l10n.spellCheck),
+          subtitle: Text(l10n.checkSpellingWhileTyping),
           value: settings.spellCheckEnabled,
           onChanged: (value) {
             settings.setSpellCheckEnabled(value);
@@ -268,15 +315,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildStorageSection(BuildContext context, SettingsProvider settings) {
+    final l10n = AppLocalizations.of(context)!;
     return ExpansionTile(
       leading: const Icon(Icons.storage),
-      title: const Text('Storage'),
+      title: Text(l10n.storage),
       initiallyExpanded: false,
       children: [
         ListTile(
-          title: const Text('Data Directory'),
+          title: Text(l10n.dataDirectory),
           subtitle: Text(settings.dataDirectory.isEmpty 
-            ? 'Default location' 
+            ? l10n.defaultLocation
             : settings.dataDirectory),
           trailing: IconButton(
             icon: const Icon(Icons.folder_open),
@@ -286,23 +334,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         ListTile(
-          title: const Text('Clear Search Index'),
-          subtitle: const Text('Rebuild search index from scratch'),
+          title: Text(l10n.clearSearchIndex),
+          subtitle: Text(l10n.rebuildSearchIndexFromScratch),
           trailing: ElevatedButton(
             onPressed: () {
               _showClearSearchIndexDialog(context);
             },
-            child: const Text('Clear'),
+            child: Text(l10n.clear),
           ),
         ),
         ListTile(
-          title: const Text('Export All Data'),
-          subtitle: const Text('Export all vaults and notes'),
+          title: Text(l10n.exportAllData),
+          subtitle: Text(l10n.exportAllVaultsAndNotes),
           trailing: ElevatedButton(
             onPressed: () {
               _showExportDataDialog(context);
             },
-            child: const Text('Export'),
+            child: Text(l10n.export),
           ),
         ),
       ],
@@ -310,19 +358,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildAboutSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ExpansionTile(
       leading: const Icon(Icons.info),
-      title: const Text('About'),
+      title: Text(l10n.about),
       initiallyExpanded: false,
       children: [
         ListTile(
-          title: const Text('Version'),
+          title: Text(l10n.version),
           subtitle: Text(_packageInfo != null 
             ? '${_packageInfo!.version} (${_packageInfo!.buildNumber})' 
-            : 'Loading...'),
+            : l10n.loading),
         ),
         ListTile(
-          title: const Text('Licenses'),
+          title: Text(l10n.licenses),
           trailing: const Icon(Icons.arrow_forward_ios, size: 16),
           onTap: () {
             showLicensePage(
@@ -334,7 +383,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           },
         ),
         ListTile(
-          title: const Text('Source Code'),
+          title: Text(l10n.sourceCode),
           subtitle: const Text('github.com/shaolonger/null-space'),
           trailing: const Icon(Icons.open_in_new, size: 16),
           onTap: () {
@@ -342,8 +391,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           },
         ),
         ListTile(
-          title: const Text('Reset to Defaults'),
-          subtitle: const Text('Reset all settings to default values'),
+          title: Text(l10n.resetToDefaults),
+          subtitle: Text(l10n.resetAllSettingsToDefaultValues),
           trailing: ElevatedButton(
             onPressed: () {
               _showResetSettingsDialog(context);
@@ -352,68 +401,95 @@ class _SettingsScreenState extends State<SettingsScreen> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Reset'),
+            child: Text(l10n.reset),
           ),
         ),
       ],
     );
   }
 
-  String _getThemeModeLabel(ThemeMode mode) {
+  String _getThemeModeLabel(BuildContext context, ThemeMode mode) {
+    final l10n = AppLocalizations.of(context)!;
     switch (mode) {
       case ThemeMode.system:
-        return 'Follow system setting';
+        return l10n.followSystemSetting;
       case ThemeMode.light:
-        return 'Light theme';
+        return l10n.lightTheme;
       case ThemeMode.dark:
-        return 'Dark theme';
+        return l10n.darkTheme;
     }
   }
 
-  String _getAutoLockLabel(Duration duration) {
+  String _getLanguageLabel(BuildContext context, Locale? locale) {
+    final l10n = AppLocalizations.of(context)!;
+    if (locale == null) {
+      return l10n.system;
+    }
+    switch (locale.toString()) {
+      case 'en':
+        return l10n.english;
+      case 'zh':
+        return l10n.chineseSimplified;
+      case 'zh_Hant':
+        return l10n.chineseTraditional;
+      case 'ja':
+        return l10n.japanese;
+      case 'ko':
+        return l10n.korean;
+      default:
+        return locale.toString();
+    }
+  }
+
+  String _getAutoLockLabel(BuildContext context, Duration duration) {
+    final l10n = AppLocalizations.of(context)!;
     if (duration == Duration.zero) {
-      return 'Never lock automatically';
+      return l10n.neverLockAutomatically;
     } else if (duration.inHours > 0) {
-      return 'Lock after ${duration.inHours} hour${duration.inHours > 1 ? "s" : ""}';
+      return l10n.lockAfterOneHour;
     } else {
-      return 'Lock after ${duration.inMinutes} minute${duration.inMinutes > 1 ? "s" : ""}';
+      return l10n.lockAfterMinutes(duration.inMinutes);
     }
   }
 
-  String _getViewModeLabel(EditorViewMode mode) {
+  String _getViewModeLabel(BuildContext context, EditorViewMode mode) {
+    final l10n = AppLocalizations.of(context)!;
     switch (mode) {
       case EditorViewMode.edit:
-        return 'Edit only';
+        return l10n.editOnly;
       case EditorViewMode.preview:
-        return 'Preview only';
+        return l10n.previewOnly;
       case EditorViewMode.split:
-        return 'Side-by-side edit and preview';
+        return l10n.sideBySideEditAndPreview;
     }
   }
 
-  String _getAutoSaveLabel(Duration interval) {
+  String _getAutoSaveLabel(BuildContext context, Duration interval) {
+    final l10n = AppLocalizations.of(context)!;
     if (interval == Duration.zero) {
-      return 'Manual save only';
+      return l10n.manualSaveOnly;
     } else if (interval.inMinutes > 0) {
-      return 'Save every ${interval.inMinutes} minute${interval.inMinutes > 1 ? "s" : ""}';
+      if (interval.inMinutes == 1) {
+        return l10n.saveEveryMinute(interval.inMinutes);
+      } else {
+        return l10n.saveEveryMinutes(interval.inMinutes);
+      }
     } else {
-      return 'Save every ${interval.inSeconds} seconds';
+      return l10n.saveEverySeconds(interval.inSeconds);
     }
   }
 
   void _showChangeDataDirectoryDialog(BuildContext context, SettingsProvider settings) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Change Data Directory'),
-        content: const Text(
-          'This feature allows you to change where your vaults and notes are stored. '
-          'Implementation coming soon.',
-        ),
+        title: Text(l10n.changeDataDirectory),
+        content: Text(l10n.changeDataDirectoryMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            child: Text(l10n.ok),
           ),
         ],
       ),
@@ -421,27 +497,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showClearSearchIndexDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Clear Search Index'),
-        content: const Text(
-          'This will clear the search index and rebuild it from scratch. '
-          'This may take a few moments.',
-        ),
+        title: Text(l10n.clearSearchIndexTitle),
+        content: Text(l10n.clearSearchIndexMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Search index cleared')),
+                SnackBar(content: Text(l10n.searchIndexCleared)),
               );
             },
-            child: const Text('Clear'),
+            child: Text(l10n.clear),
           ),
         ],
       ),
@@ -449,27 +523,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showExportDataDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Export All Data'),
-        content: const Text(
-          'This will export all your vaults and notes to a ZIP file. '
-          'You can then back up or transfer this file.',
-        ),
+        title: Text(l10n.exportAllDataTitle),
+        content: Text(l10n.exportAllDataMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Export feature coming soon')),
+                SnackBar(content: Text(l10n.exportFeatureComingSoon)),
               );
             },
-            child: const Text('Export'),
+            child: Text(l10n.export),
           ),
         ],
       ),
@@ -477,18 +549,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _showResetSettingsDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Reset Settings'),
-        content: const Text(
-          'Are you sure you want to reset all settings to their default values? '
-          'This action cannot be undone.',
-        ),
+        title: Text(l10n.resetSettingsTitle),
+        content: Text(l10n.resetSettingsMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -496,14 +566,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               settings.resetToDefaults();
               Navigator.of(context).pop();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Settings reset to defaults')),
+                SnackBar(content: Text(l10n.settingsResetToDefaults)),
               );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Reset'),
+            child: Text(l10n.reset),
           ),
         ],
       ),
@@ -511,13 +581,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _launchUrl(String urlString) async {
+    final l10n = AppLocalizations.of(context)!;
     final url = Uri.parse(urlString);
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not launch $urlString')),
+          SnackBar(content: Text(l10n.couldNotLaunchUrl(urlString))),
         );
       }
     }
