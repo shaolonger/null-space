@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../models/note.dart';
 import '../models/vault.dart';
 import '../providers/vault_provider.dart';
 import '../services/vault_service.dart';

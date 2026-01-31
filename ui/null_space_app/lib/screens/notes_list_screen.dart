@@ -250,8 +250,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
   }
 
   void _openNoteEditor(Note note) {
-    final noteProvider = Provider.of<NoteProvider>(context, listen: false);
-    noteProvider.selectNote(note);
+    context.read<NoteProvider>().selectNote(note);
 
     // TODO: Replace with actual vault credentials from VaultProvider
     // These are placeholder values for development only and should not be used in production
@@ -272,7 +271,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
     if (confirmed == true) {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
-        final noteProvider = Provider.of<NoteProvider>(context, listen: false);
+        final noteProvider = context.read<NoteProvider>();
         noteProvider.deleteNote(note.id);
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -318,8 +317,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
   }
 
   void _showTagFilter(BuildContext context) {
-    final noteProvider = Provider.of<NoteProvider>(context, listen: false);
-
+    final noteProvider = context.read<NoteProvider>();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

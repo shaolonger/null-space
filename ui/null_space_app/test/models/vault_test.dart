@@ -114,7 +114,7 @@ void main() {
     test('handles special characters in name', () {
       final vault = Vault(
         id: 'vault-special',
-        name: 'Vault! @#$% Name',
+        name: 'Vault! @#\$% Name',
         description: 'Description',
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),

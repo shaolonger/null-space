@@ -140,11 +140,9 @@ void main() {
     testWidgets('does not show already selected tags in suggestions', 
         (WidgetTester tester) async {
       final availableTags = ['work', 'urgent', 'personal'];
-      final selectedTags = ['work'];
-
       await tester.pumpWidget(createWidget(
         availableTags: availableTags,
-        initialTags: selectedTags,
+        initialTags: ['work'],
       ));
 
       // Enter text

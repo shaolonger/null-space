@@ -11,7 +11,6 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:null_space_app/bridge/rust_bridge.dart';
 import 'package:null_space_app/models/note.dart';
-import 'package:null_space_app/models/vault.dart';
 import 'package:null_space_app/services/file_storage.dart';
 import 'package:null_space_app/services/vault_service.dart';
 
@@ -364,7 +363,7 @@ void main() {
       );
 
       // Import while original still exists
-      final (importedVault, importedNotes) = await service.importVault(
+      final (importedVault, _) = await service.importVault(
         inputPath: exportPath,
         password: 'password',
       );

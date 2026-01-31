@@ -81,18 +81,15 @@ class MockRustBridge extends RustBridge {
   }
 }
 
-class MockFileStorage extends FileStorage {
+class MockFileStorage implements FileStorage {
   final Map<String, List<int>> _files = {};
   final Set<String> _directories = {};
-  bool shouldFailWrite = false;
 
-  MockFileStorage() : super.withBasePath('/tmp/mock');
+  @override
+  String get basePath => '/tmp/mock';
 
   @override
   Future<void> writeFile(String path, List<int> data) async {
-    if (shouldFailWrite) {
-      throw Exception('Failed to write file');
-    }
     _files[path] = data;
   }
 
@@ -115,6 +112,18 @@ class MockFileStorage extends FileStorage {
   @override
   Future<bool> exists(String path) async {
     return _files.containsKey(path) || _directories.contains(path);
+  }
+
+  @override
+  Future<void> deleteFile(String path) async {
+    _files.remove(path);
+  }
+
+  @override
+  Future<List<String>> listFiles(String directory) async {
+    return _files.keys
+        .where((path) => path.startsWith('$directory/'))
+        .toList();
   }
 }
 
@@ -268,7 +277,9 @@ void main() {
 
       // Initially, password should be obscured
       var passwordWidget = tester.widget<TextFormField>(passwordField);
-      expect(passwordWidget.obscureText, true);
+      final passwordTextField = passwordWidget.decoration?.suffixIcon as IconButton?;
+      final passwordIcon = passwordTextField?.icon as Icon?;
+      expect(passwordIcon?.icon, Icons.visibility);
 
       // Tap visibility toggle
       await tester.tap(find.byIcon(Icons.visibility).first);
@@ -276,7 +287,9 @@ void main() {
 
       // Password should now be visible
       passwordWidget = tester.widget<TextFormField>(passwordField);
-      expect(passwordWidget.obscureText, false);
+      final updatedIconButton = passwordWidget.decoration?.suffixIcon as IconButton?;
+      final updatedIcon = updatedIconButton?.icon as Icon?;
+      expect(updatedIcon?.icon, Icons.visibility_off);
     });
 
     testWidgets('shows password strength indicator', (WidgetTester tester) async {

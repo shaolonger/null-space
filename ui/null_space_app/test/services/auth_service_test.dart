@@ -43,6 +43,7 @@ class MockLocalAuthentication extends LocalAuthentication {
   Future<bool> authenticate({
     required String localizedReason,
     required AuthenticationOptions options,
+    List<AuthMessages>? authMessages,
   }) async {
     if (mockAuthenticateException != null) {
       throw mockAuthenticateException!;

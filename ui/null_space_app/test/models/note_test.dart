@@ -203,7 +203,7 @@ void main() {
     test('handles special characters in content', () {
       final note = Note(
         id: 'note-special-chars',
-        title: 'Special Title! @#$%',
+        title: 'Special Title! @#\$%',
         content: 'Content with "quotes" and \'apostrophes\' and \n newlines',
         tags: ['tag-with-dash', 'tag_with_underscore'],
         createdAt: DateTime.now(),

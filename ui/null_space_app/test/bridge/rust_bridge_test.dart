@@ -5,8 +5,6 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:null_space_app/bridge/rust_bridge.dart';
-import 'package:null_space_app/models/note.dart';
-import 'package:null_space_app/models/vault.dart';
 
 void main() {
   group('RustBridge', () {
