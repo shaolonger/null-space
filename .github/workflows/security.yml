@@ -1,0 +1,46 @@
+---
+name: Security Scan
+
+"on":
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run weekly on Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
+
+jobs:
+  cargo-audit:
+    name: Rust Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+
+      - name: Run cargo audit
+        run: cargo audit
+        working-directory: core/null-space-core
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v3

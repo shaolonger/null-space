@@ -1,0 +1,68 @@
+---
+name: Code Coverage
+
+"on":
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  rust-coverage:
+    name: Rust Code Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Install tarpaulin
+        run: cargo install cargo-tarpaulin
+
+      - name: Generate coverage
+        run: cargo tarpaulin --out Xml --output-dir ./coverage
+        working-directory: core/null-space-core
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./core/null-space-core/coverage/cobertura.xml
+          flags: rust
+          name: rust-coverage
+
+  flutter-coverage:
+    name: Flutter Code Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+        working-directory: ui/null_space_app
+
+      - name: Run tests with coverage
+        run: flutter test --coverage
+        working-directory: ui/null_space_app
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./ui/null_space_app/coverage/lcov.info
+          flags: flutter
+          name: flutter-coverage

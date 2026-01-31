@@ -1,0 +1,203 @@
+---
+name: CD - Release
+
+"on":
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      version: ${{ steps.get_version.outputs.version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+  build-rust:
+    name: Build Rust Library
+    needs: create-release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            artifact_name: libnull_space_core.so
+            asset_name: libnull_space_core-linux-x64.so
+          - os: windows-latest
+            artifact_name: null_space_core.dll
+            asset_name: null_space_core-windows-x64.dll
+          - os: macos-latest
+            artifact_name: libnull_space_core.dylib
+            asset_name: libnull_space_core-macos-x64.dylib
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Build release
+        run: cargo build --release --lib
+        working-directory: core/null-space-core
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path:
+            ./core/null-space-core/target/release/${{ matrix.artifact_name }}
+          asset_name: ${{ matrix.asset_name }}
+          asset_content_type: application/octet-stream
+
+  build-flutter-android:
+    name: Build Flutter Android
+    needs: create-release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+        working-directory: ui/null_space_app
+
+      - name: Build APK
+        run: flutter build apk --release
+        working-directory: ui/null_space_app
+
+      - name: Upload APK
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path:
+            ./ui/null_space_app/build/app/outputs/flutter-apk/app-release.apk
+          asset_name:
+            null-space-${{ needs.create-release.outputs.version }}-android.apk
+          asset_content_type: application/vnd.android.package-archive
+
+  build-flutter-windows:
+    name: Build Flutter Windows
+    needs: create-release
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+        working-directory: ui/null_space_app
+
+      - name: Build Windows
+        run: flutter build windows --release
+        working-directory: ui/null_space_app
+
+      - name: Create Windows ZIP
+        run: |
+          cd ui/null_space_app/build/windows/x64/runner/Release
+          7z a ../../../../../../../null-space-windows-x64.zip .
+
+      - name: Upload Windows Build
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./null-space-windows-x64.zip
+          asset_name:
+            null-space-${{ needs.create-release.outputs.version }}-windows-x64.zip
+          asset_content_type: application/zip
+
+  build-flutter-macos:
+    name: Build Flutter macOS
+    needs: create-release
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+        working-directory: ui/null_space_app
+
+      - name: Build macOS
+        run: flutter build macos --release
+        working-directory: ui/null_space_app
+
+      - name: Create macOS ZIP
+        run: |
+          cd ui/null_space_app/build/macos/Build/Products/Release
+          zip -r ../../../../../../../null-space-macos-x64.zip null_space_app.app
+
+      - name: Upload macOS Build
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./null-space-macos-x64.zip
+          asset_name:
+            null-space-${{ needs.create-release.outputs.version }}-macos-x64.zip
+          asset_content_type: application/zip
