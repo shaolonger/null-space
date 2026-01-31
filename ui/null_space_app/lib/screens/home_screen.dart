@@ -4,6 +4,7 @@ import 'note_editor_screen.dart';
 import 'notes_list_screen.dart';
 import 'vault_screen.dart';
 import 'search_screen.dart';
+import 'settings_screen.dart';
 import '../providers/vault_provider.dart';
 
 /// Home screen with navigation
@@ -21,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
     const NotesListScreen(),
     const SearchScreen(),
     const VaultScreen(),
+    const SettingsScreen(),
   ];
 
   void _navigateToNoteEditor() {
@@ -71,6 +73,10 @@ class _HomeScreenState extends State<HomeScreen> {
           NavigationDestination(
             icon: Icon(Icons.folder),
             label: 'Vault',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
           ),
         ],
       ),
