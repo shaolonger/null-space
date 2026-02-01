@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:null_space_app/l10n/app_localizations.dart';
 import '../models/note.dart';
 import '../providers/note_provider.dart';
 import '../widgets/note_card.dart';
@@ -88,7 +88,11 @@ class _NotesListScreenState extends State<NotesListScreen> {
           Text(
             l10n.createFirstNote,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                  color: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.color
+                      ?.withOpacity(0.7),
                 ),
           ),
         ],
@@ -108,7 +112,11 @@ class _NotesListScreenState extends State<NotesListScreen> {
               return Text(
                 '$count ${count == 1 ? 'note' : 'notes'}',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                      color: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.color
+                          ?.withOpacity(0.7),
                     ),
               );
             },
@@ -124,7 +132,9 @@ class _NotesListScreenState extends State<NotesListScreen> {
                       isLabelVisible: hasFilters,
                       label: Text('${noteProvider.selectedTags.length}'),
                       child: Icon(
-                        hasFilters ? Icons.filter_alt : Icons.filter_alt_outlined,
+                        hasFilters
+                            ? Icons.filter_alt
+                            : Icons.filter_alt_outlined,
                       ),
                     ),
                     tooltip: l10n.filterByTags,

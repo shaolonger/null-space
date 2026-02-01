@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:null_space_app/l10n/app_localizations.dart';
 import '../providers/search_provider.dart';
 import '../providers/note_provider.dart';
 import '../models/note.dart';
@@ -19,7 +19,7 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounceTimer;
-  
+
   // Debounce delay in milliseconds
   static const int _debounceDelay = 300;
 
@@ -74,16 +74,16 @@ class _SearchScreenState extends State<SearchScreen> {
     // In production, vault credentials must be obtained from VaultProvider
     // Example: final vault = context.read<VaultProvider>().activeVault;
     // assert(vault != null, 'No active vault for opening note');
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => NoteEditorScreen(
-            note: note,
-            vaultPath: '/tmp/default-vault',
-            vaultPassword: 'development',
-            vaultSalt: 'development-salt',
-          ),
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => NoteEditorScreen(
+          note: note,
+          vaultPath: '/tmp/default-vault',
+          vaultPassword: 'development',
+          vaultSalt: 'development-salt',
         ),
-      );
+      ),
+    );
   }
 
   @override
@@ -117,7 +117,7 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Content area
           Expanded(
             child: _buildContent(searchProvider, noteProvider, colorScheme),
@@ -309,7 +309,7 @@ class _SearchResultCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: InkWell(
@@ -331,7 +331,7 @@ class _SearchResultCard extends StatelessWidget {
                 colorScheme,
               ),
               const SizedBox(height: 8),
-              
+
               // Content snippet with highlight
               if (result.contentSnippet.isNotEmpty)
                 _buildHighlightedText(
@@ -341,7 +341,7 @@ class _SearchResultCard extends StatelessWidget {
                   ),
                   colorScheme,
                 ),
-              
+
               // Relevance score (for debugging/development)
               const SizedBox(height: 8),
               Row(
@@ -379,7 +379,7 @@ class _SearchResultCard extends StatelessWidget {
     // Example: "This is **important** text"
     final spans = <TextSpan>[];
     final parts = text.split('**');
-    
+
     for (int i = 0; i < parts.length; i++) {
       if (i % 2 == 0) {
         // Normal text

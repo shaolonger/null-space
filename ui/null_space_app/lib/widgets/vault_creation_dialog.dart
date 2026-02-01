@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:null_space_app/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../providers/vault_provider.dart';
 import '../services/vault_service.dart';
 
 /// Dialog for creating a new vault
-/// 
+///
 /// This dialog collects vault information (name, description, password)
 /// and creates a new encrypted vault using VaultService.
 class VaultCreationDialog extends StatefulWidget {
@@ -57,7 +57,8 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
     if (password.contains(RegExp(r'[A-Z]'))) strength++; // Has uppercase
     if (password.contains(RegExp(r'[a-z]'))) strength++; // Has lowercase
     if (password.contains(RegExp(r'[0-9]'))) strength++; // Has digits
-    if (password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) strength++; // Has special chars
+    if (password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]')))
+      strength++; // Has special chars
 
     // Cap at 3 for display purposes (weak, medium, strong)
     return (strength / 2).round().clamp(0, 3);
@@ -108,7 +109,7 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
   }
 
   /// Validate password
-  /// 
+  ///
   /// Note: Password is intentionally NOT trimmed to allow users to include
   /// leading or trailing whitespace in their passwords if desired.
   String? _validatePassword(String? value, AppLocalizations l10n) {
@@ -228,7 +229,9 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
                   hintText: 'Enter password (min 8 characters)',
                   prefixIcon: const Icon(Icons.lock),
                   suffixIcon: IconButton(
-                    icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+                    icon: Icon(_obscurePassword
+                        ? Icons.visibility
+                        : Icons.visibility_off),
                     onPressed: () {
                       setState(() {
                         _obscurePassword = !_obscurePassword;
@@ -284,7 +287,9 @@ class _VaultCreationDialogState extends State<VaultCreationDialog> {
                   hintText: 'Re-enter password',
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
-                    icon: Icon(_obscureConfirmPassword ? Icons.visibility : Icons.visibility_off),
+                    icon: Icon(_obscureConfirmPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off),
                     onPressed: () {
                       setState(() {
                         _obscureConfirmPassword = !_obscureConfirmPassword;

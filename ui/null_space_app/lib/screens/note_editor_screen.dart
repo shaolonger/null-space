@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:null_space_app/l10n/app_localizations.dart';
 import '../models/note.dart';
 import '../providers/note_provider.dart';
 import '../services/note_service.dart';
@@ -10,7 +10,7 @@ import '../bridge/rust_bridge.dart';
 import '../widgets/tag_input_widget.dart';
 
 /// Note Editor Screen for creating and editing notes
-/// 
+///
 /// This screen provides a full-featured editor with:
 /// - Title and content fields with validation
 /// - Tag management with autocomplete
@@ -20,13 +20,13 @@ import '../widgets/tag_input_widget.dart';
 class NoteEditorScreen extends StatefulWidget {
   /// The note to edit (null for new notes)
   final Note? note;
-  
+
   /// Path to the vault containing the note
   final String vaultPath;
-  
+
   /// Vault password for encryption
   final String vaultPassword;
-  
+
   /// Vault salt for key derivation
   final String vaultSalt;
 
@@ -46,28 +46,28 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
-  
+
   final List<String> _tags = [];
   bool _isPreviewMode = false;
   bool _isSaving = false;
   bool _hasUnsavedChanges = false;
   bool _isInitializing = true;
   bool _initializationFailed = false;
-  
+
   NoteService? _noteService;
 
   @override
   void initState() {
     super.initState();
     _initializeService();
-    
+
     // Load existing note data if editing
     if (widget.note != null) {
       _titleController.text = widget.note!.title;
       _contentController.text = widget.note!.content;
       _tags.addAll(widget.note!.tags);
     }
-    
+
     // Listen for changes to track unsaved changes
     _titleController.addListener(_onFieldChanged);
     _contentController.addListener(_onFieldChanged);
@@ -94,7 +94,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to initialize note editor. Please try reopening: $e'),
+            content: Text(
+                'Failed to initialize note editor. Please try reopening: $e'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
           ),
@@ -145,7 +146,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     if (_noteService == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Note editor is not initialized. Please reopen the editor.'),
+          content:
+              Text('Note editor is not initialized. Please reopen the editor.'),
           backgroundColor: Colors.red,
         ),
       );
@@ -158,7 +160,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
 
     try {
       final noteProvider = context.read<NoteProvider>();
-      
+
       if (widget.note == null) {
         // Create new note
         final newNote = await _noteService!.createNote(
@@ -183,7 +185,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
           updatedAt: widget.note!.updatedAt,
           version: widget.note!.version,
         );
-        
+
         final savedNote = await _noteService!.updateNote(
           note: updatedNote,
           vaultPath: widget.vaultPath,
@@ -226,7 +228,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     if (_noteService == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Note editor is not initialized. Please reopen the editor.'),
+          content:
+              Text('Note editor is not initialized. Please reopen the editor.'),
           backgroundColor: Colors.red,
         ),
       );
@@ -261,7 +264,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
 
     try {
       final noteProvider = context.read<NoteProvider>();
-      
+
       await _noteService!.deleteNote(
         noteId: widget.note!.id,
         vaultPath: widget.vaultPath,
@@ -324,7 +327,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     // Show error state if initialization failed
     if (_initializationFailed) {
       return Scaffold(
@@ -358,7 +361,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       canPop: !_hasUnsavedChanges,
       onPopInvoked: (didPop) async {
         if (didPop) return;
-        
+
         // Show unsaved changes dialog
         final shouldPop = await showDialog<bool>(
           context: context,
@@ -429,7 +432,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                               },
                             ),
                             const SizedBox(height: 16),
-                            
+
                             // Content field or preview
                             if (_isPreviewMode)
                               Container(
@@ -438,7 +441,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                                   border: Border.all(color: Colors.grey),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                constraints: const BoxConstraints(minHeight: 200),
+                                constraints:
+                                    const BoxConstraints(minHeight: 200),
                                 child: _contentController.text.isEmpty
                                     ? const Text(
                                         'No content to preview',
@@ -450,7 +454,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                                     : Markdown(
                                         data: _contentController.text,
                                         shrinkWrap: true,
-                                        physics: const NeverScrollableScrollPhysics(),
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
                                       ),
                               )
                             else
@@ -471,7 +476,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                                 },
                               ),
                             const SizedBox(height: 16),
-                            
+
                             // Tags section
                             Text(
                               l10n.tags,
@@ -481,7 +486,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            
+
                             // Tag input widget with autocomplete
                             Consumer<NoteProvider>(
                               builder: (context, noteProvider, _) {
@@ -496,7 +501,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                         ),
                       ),
                     ),
-                    
+
                     // Bottom action buttons
                     Container(
                       padding: const EdgeInsets.all(16.0),
@@ -524,7 +529,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                           Expanded(
                             flex: 2,
                             child: ElevatedButton(
-                              onPressed: _isSaving || _isInitializing ? null : _saveNote,
+                              onPressed: _isSaving || _isInitializing
+                                  ? null
+                                  : _saveNote,
                               child: Text(l10n.save),
                             ),
                           ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:null_space_app/l10n/app_localizations.dart';
 import '../models/note.dart';
 import '../models/vault.dart';
 import '../providers/vault_provider.dart';
@@ -13,7 +13,7 @@ import '../widgets/vault_creation_dialog.dart';
 import '../widgets/vault_unlock_dialog.dart';
 
 /// Enhanced vault management screen
-/// 
+///
 /// This screen displays all local vaults and provides functionality for:
 /// - Creating new vaults
 /// - Unlocking/locking vaults
@@ -48,10 +48,10 @@ class _VaultScreenState extends State<VaultScreen> {
       bridge.init();
       final storage = await FileStorage.create();
       final vaultService = VaultService(bridge: bridge, storage: storage);
-      
+
       // Load vaults
       final vaults = await vaultService.listVaults();
-      
+
       if (mounted) {
         setState(() {
           _vaultService = vaultService;
@@ -71,7 +71,7 @@ class _VaultScreenState extends State<VaultScreen> {
 
   Future<void> _refreshVaults() async {
     if (_vaultService == null) return;
-    
+
     if (mounted) {
       setState(() {
         _isLoading = true;
@@ -113,10 +113,10 @@ class _VaultScreenState extends State<VaultScreen> {
       // Update provider
       final vaultProvider = Provider.of<VaultProvider>(context, listen: false);
       vaultProvider.addVault(result);
-      
+
       // Refresh list
       await _refreshVaults();
-      
+
       _showSuccessSnackBar('Vault "${result.name}" created successfully!');
     }
   }
@@ -125,21 +125,21 @@ class _VaultScreenState extends State<VaultScreen> {
     if (_vaultService == null) return;
 
     final isUnlocked = _vaultService!.isVaultUnlocked(vault.id);
-    
+
     if (isUnlocked) {
       // Lock the vault
       _vaultService!.lockVault(vaultId: vault.id);
-      
+
       // Update provider
       final vaultProvider = Provider.of<VaultProvider>(context, listen: false);
       if (vaultProvider.currentVault?.id == vault.id) {
         vaultProvider.setCurrentVault(vault);
       }
-      
+
       setState(() {
         _selectedVaultId = null;
       });
-      
+
       _showSuccessSnackBar('Vault "${vault.name}" locked');
     } else {
       // Show unlock dialog
@@ -153,13 +153,14 @@ class _VaultScreenState extends State<VaultScreen> {
 
       if (unlocked == true && mounted) {
         // Update provider
-        final vaultProvider = Provider.of<VaultProvider>(context, listen: false);
+        final vaultProvider =
+            Provider.of<VaultProvider>(context, listen: false);
         vaultProvider.setCurrentVault(vault);
-        
+
         setState(() {
           _selectedVaultId = vault.id;
         });
-        
+
         _showSuccessSnackBar('Vault "${vault.name}" unlocked');
       }
     }
@@ -176,15 +177,16 @@ class _VaultScreenState extends State<VaultScreen> {
 
     try {
       await _vaultService!.deleteVault(vaultId: vault.id);
-      
+
       if (mounted) {
         // Update provider
-        final vaultProvider = Provider.of<VaultProvider>(context, listen: false);
+        final vaultProvider =
+            Provider.of<VaultProvider>(context, listen: false);
         vaultProvider.removeVault(vault.id);
-        
+
         // Refresh list
         await _refreshVaults();
-        
+
         _showSuccessSnackBar('Vault "${vault.name}" deleted');
       }
     } catch (e) {
@@ -209,7 +211,8 @@ class _VaultScreenState extends State<VaultScreen> {
     // Get export location
     final outputPath = await FilePicker.platform.saveFile(
       dialogTitle: 'Export Vault',
-      fileName: '${vault.name.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.zip',
+      fileName:
+          '${vault.name.replaceAll(' ', '_')}_${DateTime.now().millisecondsSinceEpoch}.zip',
       type: FileType.custom,
       allowedExtensions: ['zip'],
     );
@@ -232,8 +235,9 @@ class _VaultScreenState extends State<VaultScreen> {
       }
 
       // TODO: Load notes from vault
-      final notes = <Note>[]; // Placeholder - would need NoteService integration
-      
+      final notes =
+          <Note>[]; // Placeholder - would need NoteService integration
+
       await _vaultService!.exportVault(
         vault: vault,
         notes: notes,
@@ -284,9 +288,9 @@ class _VaultScreenState extends State<VaultScreen> {
 
     // Prompt for password
     final passwordController = TextEditingController();
-    
+
     if (!mounted) return;
-    
+
     final password = await showDialog<String>(
       context: context,
       builder: (context) => _ImportPasswordDialog(
@@ -315,9 +319,10 @@ class _VaultScreenState extends State<VaultScreen> {
 
       if (mounted) {
         // Update provider
-        final vaultProvider = Provider.of<VaultProvider>(context, listen: false);
+        final vaultProvider =
+            Provider.of<VaultProvider>(context, listen: false);
         vaultProvider.addVault(vault);
-        
+
         // Refresh list
         await _refreshVaults();
 
@@ -337,10 +342,11 @@ class _VaultScreenState extends State<VaultScreen> {
 
   Future<void> _handleRenameVault(Vault vault) async {
     final nameController = TextEditingController(text: vault.name);
-    final descriptionController = TextEditingController(text: vault.description);
+    final descriptionController =
+        TextEditingController(text: vault.description);
 
     if (!mounted) return;
-    
+
     final result = await showDialog<Map<String, String>>(
       context: context,
       builder: (context) => _RenameVaultDialog(
@@ -373,10 +379,10 @@ class _VaultScreenState extends State<VaultScreen> {
       // Update provider
       final vaultProvider = Provider.of<VaultProvider>(context, listen: false);
       vaultProvider.updateVault(updatedVault);
-      
+
       // Refresh list
       await _refreshVaults();
-      
+
       _showSuccessSnackBar('Vault renamed successfully');
     }
   }
@@ -402,7 +408,7 @@ class _VaultScreenState extends State<VaultScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     if (_isInitializing) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -548,7 +554,7 @@ class _ImportPasswordDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return AlertDialog(
       title: Text(l10n.importVault),
       content: TextField(
@@ -588,7 +594,7 @@ class _RenameVaultDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    
+
     return AlertDialog(
       title: Text(l10n.renameVault),
       content: Column(

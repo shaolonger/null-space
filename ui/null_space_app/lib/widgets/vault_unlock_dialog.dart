@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:null_space_app/l10n/app_localizations.dart';
 import '../models/vault.dart';
 import '../services/vault_service.dart';
 import '../services/auth_service.dart';
 import '../providers/settings_provider.dart';
 
 /// Dialog for unlocking a vault
-/// 
+///
 /// This dialog prompts the user to enter a password to unlock a vault.
 /// It includes password validation, error handling, biometric authentication,
 /// and warnings for multiple failed attempts.
@@ -85,7 +85,7 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
   }
 
   /// Validate password
-  /// 
+  ///
   /// Note: Password is intentionally NOT trimmed to allow users to include
   /// leading or trailing whitespace in their passwords if desired.
   String? _validatePassword(String? value, AppLocalizations l10n) {
@@ -142,7 +142,8 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Biometric authentication failed. Please use password.';
+          _errorMessage =
+              'Biometric authentication failed. Please use password.';
         });
       }
     }
@@ -151,7 +152,7 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
   /// Unlock vault
   Future<void> _unlockVault() async {
     final l10n = AppLocalizations.of(context)!;
-    
+
     // Clear previous error
     setState(() {
       _errorMessage = null;
@@ -270,7 +271,9 @@ class _VaultUnlockDialogState extends State<VaultUnlockDialog> {
                   hintText: 'Enter vault password',
                   prefixIcon: const Icon(Icons.lock),
                   suffixIcon: IconButton(
-                    icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off),
+                    icon: Icon(_obscurePassword
+                        ? Icons.visibility
+                        : Icons.visibility_off),
                     onPressed: () {
                       setState(() {
                         _obscurePassword = !_obscurePassword;

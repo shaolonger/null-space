@@ -9,7 +9,7 @@ import 'providers/settings_provider.dart';
 import 'services/search_service.dart';
 import 'bridge/rust_bridge.dart';
 import 'models/note.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:null_space_app/l10n/app_localizations.dart';
 
 // Global RustBridge instance (singleton pattern)
 final _rustBridge = RustBridge();
@@ -17,10 +17,10 @@ final _rustBridge = RustBridge();
 void main() async {
   // Initialize Rust bridge once at startup
   _rustBridge.init();
-  
+
   // Ensure Flutter bindings are initialized
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   runApp(const NullSpaceApp());
 }
 
@@ -67,11 +67,13 @@ class NullSpaceApp extends StatelessWidget {
             ],
             // Supported locales
             supportedLocales: const [
-              Locale('en'),                                           // English
-              Locale('zh'),                                           // Chinese Simplified
-              Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),  // Chinese Traditional
-              Locale('ja'),                                           // Japanese
-              Locale('ko'),                                           // Korean
+              Locale('en'), // English
+              Locale('zh'), // Chinese Simplified
+              Locale.fromSubtags(
+                  languageCode: 'zh',
+                  scriptCode: 'Hant'), // Chinese Traditional
+              Locale('ja'), // Japanese
+              Locale('ko'), // Korean
             ],
             // Use locale from settings, or system default if null
             locale: settings.locale,
@@ -96,11 +98,12 @@ class NullSpaceApp extends StatelessWidget {
 
   void _addSampleNotes(NoteProvider provider) {
     final now = DateTime.now();
-    
+
     provider.addNote(Note(
       id: 'sample-1',
       title: 'Welcome to Null Space',
-      content: 'This is a secure, local-first note-taking app with end-to-end encryption. Your notes are stored locally and never leave your device unless you explicitly export them.',
+      content:
+          'This is a secure, local-first note-taking app with end-to-end encryption. Your notes are stored locally and never leave your device unless you explicitly export them.',
       tags: ['welcome', 'info'],
       createdAt: now.subtract(const Duration(days: 5)),
       updatedAt: now.subtract(const Duration(hours: 2)),
@@ -177,7 +180,8 @@ Books I've finished:
     provider.addNote(Note(
       id: 'sample-5',
       title: 'Quick Reminder',
-      content: 'Don\'t forget to backup the database before deploying to production!',
+      content:
+          'Don\'t forget to backup the database before deploying to production!',
       tags: ['reminders', 'urgent', 'devops'],
       createdAt: now.subtract(const Duration(hours: 6)),
       updatedAt: now.subtract(const Duration(minutes: 30)),
@@ -187,7 +191,8 @@ Books I've finished:
     provider.addNote(Note(
       id: 'sample-6',
       title: '',
-      content: 'This is a note without a title to test the "Untitled Note" display.',
+      content:
+          'This is a note without a title to test the "Untitled Note" display.',
       tags: ['test'],
       createdAt: now.subtract(const Duration(days: 1)),
       updatedAt: now.subtract(const Duration(hours: 12)),

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:null_space_app/l10n/app_localizations.dart';
 
 /// Settings screen with various app preferences
 class SettingsScreen extends StatefulWidget {
@@ -57,7 +57,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildAppearanceSection(BuildContext context, SettingsProvider settings) {
+  Widget _buildAppearanceSection(
+      BuildContext context, SettingsProvider settings) {
     final l10n = AppLocalizations.of(context)!;
     return ExpansionTile(
       leading: const Icon(Icons.palette),
@@ -99,7 +100,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               if (localeCode == null) {
                 settings.setLocale(null);
               } else if (localeCode == 'zh_Hant') {
-                settings.setLocale(const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'));
+                settings.setLocale(const Locale.fromSubtags(
+                    languageCode: 'zh', scriptCode: 'Hant'));
               } else {
                 settings.setLocale(Locale(localeCode));
               }
@@ -170,7 +172,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSecuritySection(BuildContext context, SettingsProvider settings) {
+  Widget _buildSecuritySection(
+      BuildContext context, SettingsProvider settings) {
     final l10n = AppLocalizations.of(context)!;
     return ExpansionTile(
       leading: const Icon(Icons.security),
@@ -323,9 +326,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: [
         ListTile(
           title: Text(l10n.dataDirectory),
-          subtitle: Text(settings.dataDirectory.isEmpty 
-            ? l10n.defaultLocation
-            : settings.dataDirectory),
+          subtitle: Text(settings.dataDirectory.isEmpty
+              ? l10n.defaultLocation
+              : settings.dataDirectory),
           trailing: IconButton(
             icon: const Icon(Icons.folder_open),
             onPressed: () {
@@ -366,9 +369,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: [
         ListTile(
           title: Text(l10n.version),
-          subtitle: Text(_packageInfo != null 
-            ? '${_packageInfo!.version} (${_packageInfo!.buildNumber})' 
-            : l10n.loading),
+          subtitle: Text(_packageInfo != null
+              ? '${_packageInfo!.version} (${_packageInfo!.buildNumber})'
+              : l10n.loading),
         ),
         ListTile(
           title: Text(l10n.licenses),
@@ -479,7 +482,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  void _showChangeDataDirectoryDialog(BuildContext context, SettingsProvider settings) {
+  void _showChangeDataDirectoryDialog(
+      BuildContext context, SettingsProvider settings) {
     final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
@@ -562,7 +566,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ElevatedButton(
             onPressed: () {
-              final settings = Provider.of<SettingsProvider>(context, listen: false);
+              final settings =
+                  Provider.of<SettingsProvider>(context, listen: false);
               settings.resetToDefaults();
               Navigator.of(context).pop();
               ScaffoldMessenger.of(context).showSnackBar(
