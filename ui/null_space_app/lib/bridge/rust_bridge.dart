@@ -1,5 +1,5 @@
 /// FFI Bridge to Rust core library
-/// 
+///
 /// This file provides the Dart interface to the Rust core functionality.
 /// It uses FFI (Foreign Function Interface) to call native Rust code.
 
@@ -60,8 +60,7 @@ typedef DartExportVault = int Function(
 
 typedef NativeImportVault = Pointer<Utf8> Function(
     Pointer<Utf8>, Pointer<Utf8>);
-typedef DartImportVault = Pointer<Utf8> Function(
-    Pointer<Utf8>, Pointer<Utf8>);
+typedef DartImportVault = Pointer<Utf8> Function(Pointer<Utf8>, Pointer<Utf8>);
 
 /// Exception thrown when FFI operations fail
 class FFIException implements Exception {
@@ -73,13 +72,13 @@ class FFIException implements Exception {
 }
 
 /// Rust bridge interface
-/// 
+///
 /// This class provides access to Rust core functionality via FFI.
-/// 
+///
 /// **Thread Safety**: This class is not thread-safe and should only be accessed
 /// from a single isolate. If you need to use it from multiple isolates, create
 /// a separate instance in each isolate.
-/// 
+///
 /// **Resource Management**: Always call `init()` before using any methods and
 /// `dispose()` when done to prevent memory leaks. Consider using this class
 /// with try-finally blocks:
@@ -112,36 +111,48 @@ class RustBridge {
   RustBridge() {
     // Load the native library
     if (Platform.isAndroid || Platform.isLinux) {
+      print(
+          '[FFI DEBUG] Loading library for Android/Linux: libnull_space_core.so');
       _dylib = DynamicLibrary.open('libnull_space_core.so');
     } else if (Platform.isIOS || Platform.isMacOS) {
+      print(
+          '[FFI DEBUG] Loading library for iOS/macOS using DynamicLibrary.process()');
       _dylib = DynamicLibrary.process();
     } else if (Platform.isWindows) {
+      print('[FFI DEBUG] Loading library for Windows: null_space_core.dll');
       _dylib = DynamicLibrary.open('null_space_core.dll');
     } else {
       throw UnsupportedError('Platform not supported');
     }
 
+    print('[FFI DEBUG] Library loaded successfully');
+
     // Look up all function pointers
     _init = _dylib.lookupFunction<NativeInit, DartInit>('null_space_init');
     _free = _dylib.lookupFunction<NativeFree, DartFree>('null_space_free');
-    _freeString = _dylib
-        .lookupFunction<NativeFreeString, DartFreeString>('null_space_free_string');
-    _generateSaltFunc = _dylib
-        .lookupFunction<NativeGenerateSalt, DartGenerateSalt>('null_space_generate_salt');
+    _freeString = _dylib.lookupFunction<NativeFreeString, DartFreeString>(
+        'null_space_free_string');
+    _generateSaltFunc =
+        _dylib.lookupFunction<NativeGenerateSalt, DartGenerateSalt>(
+            'null_space_generate_salt');
     _encryptFunc =
         _dylib.lookupFunction<NativeEncrypt, DartEncrypt>('null_space_encrypt');
     _decryptFunc =
         _dylib.lookupFunction<NativeDecrypt, DartDecrypt>('null_space_decrypt');
-    _createNoteFunc = _dylib
-        .lookupFunction<NativeCreateNote, DartCreateNote>('null_space_create_note');
-    _updateNoteFunc = _dylib
-        .lookupFunction<NativeUpdateNote, DartUpdateNote>('null_space_update_note');
+    _createNoteFunc = _dylib.lookupFunction<NativeCreateNote, DartCreateNote>(
+        'null_space_create_note');
+    _updateNoteFunc = _dylib.lookupFunction<NativeUpdateNote, DartUpdateNote>(
+        'null_space_update_note');
     _searchFunc =
         _dylib.lookupFunction<NativeSearch, DartSearch>('null_space_search');
-    _exportVaultFunc = _dylib
-        .lookupFunction<NativeExportVault, DartExportVault>('null_space_export_vault');
-    _importVaultFunc = _dylib
-        .lookupFunction<NativeImportVault, DartImportVault>('null_space_import_vault');
+    _exportVaultFunc =
+        _dylib.lookupFunction<NativeExportVault, DartExportVault>(
+            'null_space_export_vault');
+    _importVaultFunc =
+        _dylib.lookupFunction<NativeImportVault, DartImportVault>(
+            'null_space_import_vault');
+
+    print('[FFI DEBUG] All function pointers loaded successfully');
   }
 
   /// Initialize the library
@@ -216,15 +227,22 @@ class RustBridge {
   }
 
   /// Encrypt data with a password and salt
-  /// 
+  ///
   /// Returns a base64-encoded string containing the encrypted data.
   String encrypt(String data, String password, String salt) {
+    print(
+        '[FFI DEBUG] encrypt called with data length: ${data.length}, password length: ${password.length}, salt length: ${salt.length}');
+    print('[FFI DEBUG] salt value: "$salt"');
     final dataPtr = _toNativeString(data);
     final passwordPtr = _toNativeString(password);
     final saltPtr = _toNativeString(salt);
 
+    print(
+        '[FFI DEBUG] Pointers created: data=${dataPtr.address}, password=${passwordPtr.address}, salt=${saltPtr.address}');
+
     try {
       final resultPtr = _encryptFunc(dataPtr, passwordPtr, saltPtr);
+      print('[FFI DEBUG] encrypt result pointer: ${resultPtr.address}');
       return _fromNativeString(resultPtr, 'Encryption');
     } finally {
       malloc.free(dataPtr);
@@ -234,7 +252,7 @@ class RustBridge {
   }
 
   /// Decrypt data with a password and salt
-  /// 
+  ///
   /// Takes a base64-encoded encrypted string and returns the decrypted plaintext.
   String decrypt(String encryptedData, String password, String salt) {
     final encryptedPtr = _toNativeString(encryptedData);
@@ -252,7 +270,7 @@ class RustBridge {
   }
 
   /// Create a new note
-  /// 
+  ///
   /// Returns a Note object with a generated UUID and timestamps.
   Note createNote(String title, String content, List<String> tags) {
     final titlePtr = _toNativeString(title);
@@ -280,7 +298,7 @@ class RustBridge {
   }
 
   /// Update an existing note
-  /// 
+  ///
   /// Takes a Note object, increments its version, and updates the timestamp.
   /// Returns the updated Note.
   Note updateNote(Note note) {
@@ -305,10 +323,9 @@ class RustBridge {
   }
 
   /// Search notes in the index
-  /// 
+  ///
   /// Returns a list of search results with note IDs and relevance scores.
-  List<Map<String, dynamic>> search(
-      String indexPath, String query, int limit) {
+  List<Map<String, dynamic>> search(String indexPath, String query, int limit) {
     final indexPathPtr = _toNativeString(indexPath);
     final queryPtr = _toNativeString(query);
 
@@ -340,7 +357,7 @@ class RustBridge {
   }
 
   /// Export a vault to a ZIP file
-  /// 
+  ///
   /// Returns true on success, throws FFIException on error with detailed message.
   bool exportVault(
       Vault vault, List<Note> notes, String outputPath, String password) {
@@ -370,9 +387,9 @@ class RustBridge {
   }
 
   /// Import a vault from a ZIP file
-  /// 
+  ///
   /// Returns a map containing the vault and notes.
-  /// 
+  ///
   /// The returned map has two keys:
   /// - 'vault': A [Vault] object with the vault metadata
   /// - 'notes': A [List<Note>] containing all notes from the vault
@@ -384,7 +401,7 @@ class RustBridge {
       final resultPtr = _importVaultFunc(inputPathPtr, passwordPtr);
       final jsonString = _fromNativeString(resultPtr, 'Import vault');
       final decoded = jsonDecode(jsonString);
-      
+
       if (decoded is! Map<String, dynamic>) {
         throw FFIException(
             'Import vault failed: Expected JSON object, got ${decoded.runtimeType}');
@@ -392,10 +409,12 @@ class RustBridge {
 
       // Validate structure
       if (!decoded.containsKey('vault')) {
-        throw FFIException('Import vault failed: Missing "vault" key in response');
+        throw FFIException(
+            'Import vault failed: Missing "vault" key in response');
       }
       if (!decoded.containsKey('notes')) {
-        throw FFIException('Import vault failed: Missing "notes" key in response');
+        throw FFIException(
+            'Import vault failed: Missing "notes" key in response');
       }
 
       final vaultData = decoded['vault'];

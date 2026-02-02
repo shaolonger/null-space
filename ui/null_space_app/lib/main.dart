@@ -7,6 +7,8 @@ import 'providers/note_provider.dart';
 import 'providers/search_provider.dart';
 import 'providers/settings_provider.dart';
 import 'services/search_service.dart';
+import 'services/vault_service.dart';
+import 'services/file_storage.dart';
 import 'bridge/rust_bridge.dart';
 import 'models/note.dart';
 import 'package:null_space_app/l10n/app_localizations.dart';
@@ -14,12 +16,19 @@ import 'package:null_space_app/l10n/app_localizations.dart';
 // Global RustBridge instance (singleton pattern)
 final _rustBridge = RustBridge();
 
+// Global VaultService instance (singleton pattern)
+late final VaultService _vaultService;
+
 void main() async {
+  // Ensure Flutter bindings are initialized
+  WidgetsFlutterBinding.ensureInitialized();
+
   // Initialize Rust bridge once at startup
   _rustBridge.init();
 
-  // Ensure Flutter bindings are initialized
-  WidgetsFlutterBinding.ensureInitialized();
+  // Initialize VaultService with FileStorage
+  final storage = await FileStorage.create();
+  _vaultService = VaultService(bridge: _rustBridge, storage: storage);
 
   runApp(const NullSpaceApp());
 }
@@ -31,6 +40,7 @@ class NullSpaceApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        Provider<VaultService>.value(value: _vaultService),
         ChangeNotifierProvider(create: (_) => VaultProvider()),
         ChangeNotifierProvider(
           create: (_) {

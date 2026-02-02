@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'note_editor_screen.dart';
 import 'notes_list_screen.dart';
 import 'vault_screen.dart';
 import 'search_screen.dart';
 import 'settings_screen.dart';
+import '../providers/vault_provider.dart';
+import '../services/vault_service.dart';
 
 /// Home screen with navigation
 class HomeScreen extends StatefulWidget {
@@ -23,15 +26,34 @@ class _HomeScreenState extends State<HomeScreen> {
     const SettingsScreen(),
   ];
 
-  void _navigateToNoteEditor() {
-    // TODO: Replace with actual vault credentials from VaultProvider
-    // For now, using placeholder values for development
+  void _navigateToNoteEditor() async {
+    final vaultProvider = context.read<VaultProvider>();
+    final currentVault = vaultProvider.currentVault;
+
+    if (currentVault == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please unlock a vault first')),
+      );
+      return;
+    }
+
+    final vaultService = context.read<VaultService>();
+
+    final vaultPassword = vaultService.getVaultPassword(currentVault.id);
+    if (vaultPassword == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Vault is locked. Please unlock it first')),
+      );
+      return;
+    }
+
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => const NoteEditorScreen(
-          vaultPath: '/tmp/default-vault',
-          vaultPassword: 'development',
-          vaultSalt: 'development-salt',
+        builder: (context) => NoteEditorScreen(
+          vaultPath: 'vaults/${currentVault.id}',
+          vaultPassword: vaultPassword,
+          vaultSalt: currentVault.salt,
         ),
       ),
     );

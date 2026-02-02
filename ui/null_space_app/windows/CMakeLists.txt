@@ -99,3 +99,12 @@ install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
 install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   CONFIGURATIONS Profile;Release
   COMPONENT Runtime)
+
+# Install the Rust core library
+set(RUST_CORE_DLL "${CMAKE_CURRENT_SOURCE_DIR}/../../../target/release/null_space_core.dll")
+if(EXISTS "${RUST_CORE_DLL}")
+  install(FILES "${RUST_CORE_DLL}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+    COMPONENT Runtime)
+else()
+  message(WARNING "Rust core DLL not found at ${RUST_CORE_DLL}. Please build the Rust library first.")
+endif()

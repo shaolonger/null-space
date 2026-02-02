@@ -4,8 +4,10 @@ import 'package:provider/provider.dart';
 import 'package:null_space_app/l10n/app_localizations.dart';
 import '../providers/search_provider.dart';
 import '../providers/note_provider.dart';
+import '../providers/vault_provider.dart';
 import '../models/note.dart';
 import '../services/search_service.dart';
+import '../services/vault_service.dart';
 import 'note_editor_screen.dart';
 
 /// Full-featured search screen with debounced input and results
@@ -54,7 +56,7 @@ class _SearchScreenState extends State<SearchScreen> {
     _onSearchChanged(query);
   }
 
-  void _onResultTap(SearchResult result, List<Note> notes) {
+  void _onResultTap(SearchResult result, List<Note> notes) async {
     // Find the note in the provider
     final note = notes.firstWhere(
       (n) => n.id == result.noteId,
@@ -69,18 +71,34 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
     );
 
-    // TODO: Replace with actual vault credentials from VaultProvider
-    // SECURITY WARNING: These hard-coded credentials are for DEVELOPMENT ONLY
-    // In production, vault credentials must be obtained from VaultProvider
-    // Example: final vault = context.read<VaultProvider>().activeVault;
-    // assert(vault != null, 'No active vault for opening note');
+    final vaultProvider = context.read<VaultProvider>();
+    final currentVault = vaultProvider.currentVault;
+
+    if (currentVault == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please unlock a vault first')),
+      );
+      return;
+    }
+
+    final vaultService = context.read<VaultService>();
+
+    final vaultPassword = vaultService.getVaultPassword(currentVault.id);
+    if (vaultPassword == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Vault is locked. Please unlock it first')),
+      );
+      return;
+    }
+
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => NoteEditorScreen(
           note: note,
-          vaultPath: '/tmp/default-vault',
-          vaultPassword: 'development',
-          vaultSalt: 'development-salt',
+          vaultPath: 'vaults/${currentVault.id}',
+          vaultPassword: vaultPassword,
+          vaultSalt: currentVault.salt,
         ),
       ),
     );

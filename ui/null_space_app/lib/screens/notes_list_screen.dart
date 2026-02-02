@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:null_space_app/l10n/app_localizations.dart';
 import '../models/note.dart';
 import '../providers/note_provider.dart';
+import '../providers/vault_provider.dart';
+import '../services/vault_service.dart';
 import '../widgets/note_card.dart';
 import '../widgets/tag_filter_widget.dart';
 import 'note_editor_screen.dart';
@@ -259,18 +261,37 @@ class _NotesListScreenState extends State<NotesListScreen> {
     await Future.delayed(const Duration(milliseconds: 500));
   }
 
-  void _openNoteEditor(Note note) {
+  void _openNoteEditor(Note note) async {
     context.read<NoteProvider>().selectNote(note);
 
-    // TODO: Replace with actual vault credentials from VaultProvider
-    // These are placeholder values for development only and should not be used in production
-    // The app should prevent navigation to the editor if vault credentials are not available
+    final vaultProvider = context.read<VaultProvider>();
+    final currentVault = vaultProvider.currentVault;
+
+    if (currentVault == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please unlock a vault first')),
+      );
+      return;
+    }
+
+    final vaultService = context.read<VaultService>();
+
+    final vaultPassword = vaultService.getVaultPassword(currentVault.id);
+    if (vaultPassword == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Vault is locked. Please unlock it first')),
+      );
+      return;
+    }
+
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => const NoteEditorScreen(
-          vaultPath: '/tmp/default-vault',
-          vaultPassword: 'development',
-          vaultSalt: 'development-salt',
+        builder: (context) => NoteEditorScreen(
+          note: note,
+          vaultPath: 'vaults/${currentVault.id}',
+          vaultPassword: vaultPassword,
+          vaultSalt: currentVault.salt,
         ),
       ),
     );

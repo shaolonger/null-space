@@ -64,6 +64,7 @@ pub extern "C" fn null_space_encrypt(
 ) -> *mut c_char {
     // Validate input pointers
     if data.is_null() || password.is_null() || salt.is_null() {
+        eprintln!("[FFI ERROR] null_space_encrypt: One or more input pointers is null");
         return ptr::null_mut();
     }
 
@@ -71,34 +72,49 @@ pub extern "C" fn null_space_encrypt(
     let data_str = unsafe {
         match CStr::from_ptr(data).to_str() {
             Ok(s) => s,
-            Err(_) => return ptr::null_mut(),
+            Err(e) => {
+                eprintln!("[FFI ERROR] null_space_encrypt: Failed to convert data to UTF-8: {}", e);
+                return ptr::null_mut();
+            }
         }
     };
 
     let password_str = unsafe {
         match CStr::from_ptr(password).to_str() {
             Ok(s) => s,
-            Err(_) => return ptr::null_mut(),
+            Err(e) => {
+                eprintln!("[FFI ERROR] null_space_encrypt: Failed to convert password to UTF-8: {}", e);
+                return ptr::null_mut();
+            }
         }
     };
 
     let salt_str = unsafe {
         match CStr::from_ptr(salt).to_str() {
             Ok(s) => s,
-            Err(_) => return ptr::null_mut(),
+            Err(e) => {
+                eprintln!("[FFI ERROR] null_space_encrypt: Failed to convert salt to UTF-8: {}", e);
+                return ptr::null_mut();
+            }
         }
     };
 
     // Create encryption manager
     let manager = match EncryptionManager::new_from_password(password_str, salt_str) {
         Ok(m) => m,
-        Err(_) => return ptr::null_mut(),
+        Err(e) => {
+            eprintln!("[FFI ERROR] null_space_encrypt: Failed to create encryption manager: {}", e);
+            return ptr::null_mut();
+        }
     };
 
     // Encrypt the data
     let encrypted = match manager.encrypt(data_str.as_bytes()) {
         Ok(e) => e,
-        Err(_) => return ptr::null_mut(),
+        Err(e) => {
+            eprintln!("[FFI ERROR] null_space_encrypt: Encryption failed: {}", e);
+            return ptr::null_mut();
+        }
     };
 
     // Encode as base64
@@ -107,7 +123,10 @@ pub extern "C" fn null_space_encrypt(
     // Convert to C string
     match CString::new(encoded) {
         Ok(c_str) => c_str.into_raw(),
-        Err(_) => ptr::null_mut(),
+        Err(e) => {
+            eprintln!("[FFI ERROR] null_space_encrypt: Failed to create C string: {}", e);
+            ptr::null_mut()
+        }
     }
 }
 
